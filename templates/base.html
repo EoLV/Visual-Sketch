@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+	<link rel="shortcut icon" href="data/icon.png">
+	<title>{% block title %}网络可视化展示平台{% endblock %}</title>
+	<link href="{{ url_for('static', filename='theme/style.css') }}" type="text/css" rel="stylesheet">
+	<link href="{{ url_for('static', filename='theme/table.css') }}" type="text/css" rel="stylesheet">
+	<!-- jquery -->
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<!-- DataTables -->
+	<link rel="stylesheet" type="text/css" href="http://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+	<script type="text/javascript" charset="utf8" src="http://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
+	<!-- Echarts -->
+	<script src="/static/js/echarts.min.js"></script>
+	<script src="/static/js/macarons.js"></script>
+</head>
+<html>
+<body>
+	<div id="sidebar">
+		<h1 style="font-size: 30px; letter-spacing: 0.1ex;" id="callblock0">网络可视化展示平台</h1>
+		<div class="buttons">
+			<ul>
+				<li id="callblock1"><a href={%if args %} {{'/show/1?id=' + args}} {% else %} '/show/1' {% endif %} > 总流量 </a></li>
+				<li id="callblock2"><a href={%if args %} {{'/show/2?id=' + args}} {% else %} '/show/2' {% endif %} > 流分布 </a></li>
+				<li id="callblock3"><a href={%if args %} {{'/show/3?id=' + args}} {% else %} '/show/3' {% endif %} > 大象流 </a></li>
+				<li id="callblock4"><a href={%if args %} {{'/show/4?id=' + args}} {% else %} '/show/4' {% endif %} > 流列表 </a></li>
+				<li id="reflesh"><a href="#" onclick="reflesh_Goback()"> 刷新 </a></li>
+			</ul>
+		</div>
+		<div id="container2" style="position:absolute;left:10%;width:80%;bottom:100px;height:80px"></div>
+		<div id="dataattr" style="position:absolute;left:10%;width:80%;bottom:50px;">
+		{{ chart2.thisattr[1] | safe }} (Data {{ chart2.thisattr[0] | safe }})
+		</div>
+	</div>
+	<div id="main">
+		{% block main %}
+		{% endblock %}
+	</div>
+	{% block body %}
+	{% endblock %}
+</body>
+<script>
+function reflesh_Goback(){
+	window.location.href = '/reflesh?url=' + window.location.pathname;
+}
+
+var dom = document.getElementById("container2");
+var myChart = echarts.init(dom, 'macarons');
+var app = {};
+
+var option;
+
+option = {
+	tooltip: {
+		trigger: 'item'
+	},
+	grid: [
+		{left: '5%', right: '5%', top: '5%', bottom: '5%', containLabel: true}
+	],
+	xAxis: [
+		{
+			type: 'category',
+			gridIndex: 0,
+			axisLabel: {
+				show: false
+			},
+			axisTick: {
+				show: false
+			},
+			axisLine: {
+				lineStyle: {
+					color: '#759aa0',
+					width: 2
+				}
+			}
+		}
+	],
+	yAxis: [
+		{
+			type: 'value',
+			gridIndex: 0,
+			show: false,
+			max: 'dataMax',
+			axisLabel:
+			{
+				show: false
+			}
+		}
+	],
+	series: [
+		{
+			name: 'Attribution',
+			type: 'bar',
+			tooltip: {
+				formatter: function (params)
+				{
+					var str = '<div style="text-align:left">'
+					str += params.marker + ' Data ' + params.name + '<br>';
+					str += '　 <strong>' + params.data.time + '</strong><br>';
+					str += '　 <strong>Cardinality: ' + params.data.value[1] + '</strong><br>';
+					str += '</div>'
+					return str;
+				}
+			},
+			xAxisIndex: 0,
+			yAxisIndex: 0,
+			itemStyle: {
+				barBorderRadius: [5, 5, 0, 0],
+				shadowBlur: 5
+			},
+			data: {{ chart2.sidebardata | safe }}
+		}
+	]
+};
+
+myChart.on('click', 'series', function(obj) {
+	var str = window.location.pathname + '?id=' + obj.data.value[0];
+	// console.log(str);
+	window.location.href = str;
+
+})
+
+myChart.setOption(option);
+
+
+</script>
+</html>

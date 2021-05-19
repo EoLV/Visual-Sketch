@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}网络可视化展示平台{% endblock %}
+
+{% block main %}
+<div class="block" id="block1">
+	<h2>总流量</h2>
+	<div id="container1" style="width: 1120px;height:800px;"></div>
+	<div style="color:#999;text-align:center">Designed by Zining Dong. Data Source: Qifan Ren.</div>
+	<!-- {{chart1.sunburstdata | safe}} -->
+</div>
+
+<script>
+var dom = document.getElementById("container1");
+var myChart = echarts.init(dom, 'macarons');
+var app = {};
+
+var option;
+
+option = {
+	toolbox: {
+		feature: {
+			dataView: {},
+			restore: {},
+			saveAsImage: {}
+		}
+	},
+	tooltip: {
+		trigger: 'item'
+	},
+	grid: [
+		{left: '60%', right: '6%', top: '10%', bottom: '45%', containLabel: true}
+	],
+	xAxis: [
+		{
+			type: 'category',
+			gridIndex: 0,
+			axisLabel: {
+				interval: 0,
+				rotate: 30,
+				align: 'right'
+			},
+			axisLine: {
+				show: false
+			},
+			axisTick: {
+				show: false
+			}
+		}
+	],
+	yAxis: [
+		{
+			type: 'category',
+			gridIndex: 0,
+			axisLine: {
+				show: false
+			},
+			axisTick: {
+				show: false
+			}
+		},
+	],
+	series: [
+	{
+		center: ['30%', '45%'],
+		type: 'sunburst',
+		sort: null,
+		tooltip: {
+			formatter: function (params)
+			{
+				var str = params.marker + ' ' + params.name + '<br>';
+				str += '　 <strong>' + params.data.traffic + ' packets</strong><br>';
+				str += '　 <strong>' + params.data.flow + ' flows</strong>';
+				return str;
+			}
+		},
+		emphasis: {
+			focus: 'ancestor'
+		},
+		label: {
+			rotate: 'radial'
+		},
+		levels: [{
+			tooltip: {
+				show: false
+			},
+			itemStyle: {
+				color: '#ccc'
+			},
+		}, {
+			r0: '20%',
+			r: '40%',
+			nodeClick: 'rootToNode',
+			label: {
+			},
+		}, {
+			r0: '40%',
+			r: '50%',
+			nodeClick: 'rootToNode',
+			itemStyle: {
+				borderMiterLimit: 10
+			},
+			label: {
+				rotate: 'tangential'
+			}
+		}, {
+			r0: '50%',
+			r: '70%',
+			nodeClick: false,
+			itemStyle: {
+				borderMiterLimit: 10
+			},
+			label: {
+				align: 'right'
+			}
+		}],
+		itemStyle: {
+			borderWidth: 2
+		},
+		data: {{ chart1.sunburstdata | safe }}
+	},
+	{
+		id: 'pie1',
+		type: 'pie',
+		center: ['30%', '45%'],
+		radius: ['0%'],
+		tooltip: { show: false },
+		color: 'rgba(0, 0, 0, 0)',
+		label: {
+			position: 'center',
+			fontSize: 30,
+			fontWeight: 'bold',
+			textBorderColor: 'rgba(255,255,255,0.6)',
+			textBorderWidth: 4
+		},
+		data: [ { 'name': 'Traffic', 'value': 1 } ]
+	},
+	{
+		type: 'heatmap',
+		label: {
+			show: true
+		},
+		tooltip: {
+			formatter: function (params)
+			{
+				var str = params.value[1] + '&gt&gt' + params.value[0] + '<br>';
+				str += params.marker + ' <strong>' + params.value[2] + '%</strong>';
+				return str;
+			}
+		},
+		itemStyle: {
+			borderWidth: 2,
+			borderJoin: 'bevel'
+		},
+		data: {{ chart1.heatmapdata | safe }}
+	},
+	{
+		name: 'Traffic',
+		type: 'gauge',
+		center: ['63%', '72%'],
+		radius: '27%',
+		startAngle: 215,
+		endAngle: -35,
+		tooltip: {
+			show: false
+		},
+		title: {
+			fontSize: 20,
+			textBorderColor: 'rgba(255,255,255,0.6)',
+			textBorderWidth: 4,
+			offsetCenter : [0, '65%']
+		},
+		detail: {
+			formatter: '{value}',
+			fontSize: 22,
+			textBorderColor: 'rgba(255,255,255,0.6)',
+			textBorderWidth: 4,
+		},
+		pointer: {
+			show : true,
+			itemStyle: {
+				color : '#2EC7C9'
+			}
+		},
+		axisLine: {
+			show : true,
+			lineStyle: {
+				color : 
+				[
+					[ 1, new echarts.graphic.LinearGradient(
+						1, 0, 0, 0,
+						[{ offset: 0, color: '#2EC7C9' },
+						{offset: 0.8, color: '#E6EBF8' }] )]
+				],
+			}
+		},
+		data: [{
+			value: {{ chart1.gauge1data[0] | safe }},
+			name: 'Total Traffic',
+		}, {
+			value: {{ chart1.gauge1data[0] | safe }},
+			name: 'x' + {{ chart1.gauge1data[1] | safe }} + 'M',
+			pointer: { show : false },
+			title: {
+				fontSize: 12,
+				offsetCenter : ['28%', '20%']
+			}
+		}]
+	},
+	{
+		name: 'Cardinary',
+		type: 'gauge',
+		center: ['85%', '72%'],
+		radius: '27%',
+		startAngle: 215,
+		endAngle: -35,
+		tooltip: {
+			show: false
+		},
+		title: {
+			fontSize: 20,
+			textBorderColor: 'rgba(255,255,255,0.6)',
+			textBorderWidth: 4,
+			offsetCenter : [0, '65%']
+		},
+		detail: {
+			formatter: '{value}',
+			fontSize: 22,
+			textBorderColor: 'rgba(255,255,255,0.6)',
+			textBorderWidth: 4,
+		},
+		pointer: {
+			show : true,
+			itemStyle: {
+				color : '#b6a2de'
+			}
+		},
+		axisLine: {
+			show : true,
+			lineStyle: {
+				color : 
+				[
+					[ 1, new echarts.graphic.LinearGradient(
+						1, 0, 0, 0,
+						[{ offset: 0, color: '#b6a2de' },
+						{offset: 0.8, color: '#E6EBF8' }] )]
+				],
+			}
+		},
+		data: [{
+			value: {{ chart1.gauge2data[0] | safe }},
+			name: 'Cardinary',
+			itemStyle:{}
+		}, {
+			value: {{ chart1.gauge2data[0] | safe }},
+			name: 'x' + {{ chart1.gauge2data[1] | safe }},
+			pointer: { show : false },
+			title: {
+				fontSize: 12,
+				offsetCenter : ['28%', '20%']
+			}
+		}]
+	}
+
+	]
+};
+
+if (option && typeof option === 'object') {
+	myChart.setOption(option);
+}
+</script>
+{% endblock %}

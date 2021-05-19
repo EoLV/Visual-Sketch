@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}网络可视化展示平台{% endblock %}
+
+{% block main %}
+<div class="block" id="block1">
+	<h2>大象流</h2>
+	<div id="container1" style="width: 1120px;height:800px;"></div>
+	<div style="color:#999;text-align:center">Designed by Zining Dong. Data Source: Qifan Ren.</div>
+	<!-- {{chart1 | safe}} -->
+</div>
+
+<script>
+var dom = document.getElementById("container1");
+var myChart = echarts.init(dom, 'macarons');
+var app = {};
+
+var option;
+
+option = {
+	toolbox: {
+		feature: {
+			dataView: {},
+			restore: {},
+			saveAsImage: {}
+		}
+	},
+	tooltip: {
+		trigger: 'item'
+	},
+	grid: [
+		{left: '3%', right: '3%', top: '7%', bottom: '60%', containLabel: true},
+		{left: '3%', right: '3%', top: '52%', bottom: '15%', containLabel: true}
+	],
+	dataZoom: [
+		{
+			type: 'inside',
+			xAxisIndex: 0,
+			fiterMode: 'filter',
+			bottom: '15%',
+			startValue: 0,
+			endValue: 29
+		},
+		{
+			type: 'inside',
+			xAxisIndex: 1,
+			fiterMode: 'filter',
+			bottom: '15%',
+			startValue: 0,
+			endValue: 29
+		}
+	],
+	xAxis: [
+		{
+			type: 'category',
+			gridIndex: 0
+		},
+		{
+			type: 'category',
+			gridIndex: 1
+		},
+	],
+	yAxis: [
+		{
+			type: 'value',
+			gridIndex: 0,
+			scale: true
+		},
+		{
+			type: 'value',
+			gridIndex: 1,
+			scale: true
+		}
+	],
+	series: [
+		{
+			name: 'Elephant',
+			type: 'bar',
+			tooltip: {
+				formatter: function (params)
+				{
+					// console.log(params)
+					var str = params.marker + ' ' + params.name + '<br>';
+					str += '　 <strong>ID: ' + params.data.ID + '　 Length: ' + params.value[1] + '</strong>';
+					return str;
+				}
+			},
+			xAxisIndex: 0,
+			yAxisIndex: 0,
+			itemStyle: {
+				barBorderRadius: [5, 5, 0, 0],
+				shadowBlur: 5
+			},
+			data: {{ chart1.elephantdata | safe }}
+		},
+		{
+			name: 'Swapt',
+			type: 'bar',
+			tooltip: {
+				formatter: function (params)
+				{
+					console.log(params)
+					var str = params.marker + ' ' + params.name + '<br>';
+					str += '　 <strong>ID: ' + params.data.ID + '　 Length: ' + params.value[1] + '</strong>';
+					return str;
+				}
+			},
+			xAxisIndex: 1,
+			yAxisIndex: 1,
+			itemStyle: {
+				barBorderRadius: [5, 5, 0, 0],
+				shadowBlur: 5
+			},
+			data: {{ chart1.swaptdata | safe }}
+		},
+		{
+			id: 'pie1',
+			type: 'pie',
+			center: ['50%', '43%'],
+			radius: ['0%'],
+			tooltip: { show: false },
+			color: 'rgba(0, 0, 0, 0)',
+			label: {
+				position: 'center',
+				fontSize: 20,
+				textBorderColor: 'rgba(255,255,255,0.6)',
+				textBorderWidth: 4,
+			},
+			data: [ { 'name': 'Elephant Flows', 'value': 1 } ]
+		},
+		{
+			id: 'pie2',
+			type: 'pie',
+			center: ['50%', '88%'],
+			radius: ['0%'],
+			tooltip: { show: false },
+			color: 'rgba(0, 0, 0, 0)',
+			label: {
+				position: 'center',
+				fontSize: 20,
+				textBorderColor: 'rgba(255,255,255,0.6)',
+				textBorderWidth: 4,
+			},
+			data: [ { 'name': 'New Elephant Flows', 'value': 1 } ]
+		}
+	]
+};
+
+if (option && typeof option === 'object') {
+	myChart.setOption(option);
+}
+</script>
+{% endblock %}

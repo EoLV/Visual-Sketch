@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}网络可视化展示平台{% endblock %}
+
+{% block main %}
+<div class="block" id="block1" style="opacity:0">
+	<h2>流列表</h2>
+	<table id="container1" class="display">
+		{{ table1 | safe }}
+	</table>
+	<div style="color:#999;text-align:center">Designed by Zining Dong. Data Source: Qifan Ren.</div>
+</div>
+
+<script>
+$(document).ready( function () {
+	$('#container1').addClass('table table-bordered');
+	$('#container1').DataTable( {
+		bLengthChange: false,
+		paging: true,
+		iDisplayLength: 100,
+		scrollY: 715,
+		searching: false,
+		autoWidth: true,
+		oLanguage: {
+			sInfo: "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+			sLengthMenu: "每页显示 _MENU_ 项结果",
+			oPaginate: {
+				sFirst: "<<",
+				sPrevious: "<",
+				sNext: ">",
+				sLast: ">>"
+			}
+		}
+	} );
+	document.getElementById('block1').style.opacity = 1;
+} );
+</script>
+{% endblock %}

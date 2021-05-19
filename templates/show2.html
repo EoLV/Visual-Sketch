@@ -1,0 +1,830 @@
+{% extends 'base.html' %}
+
+{% block title %}网络可视化展示平台{% endblock %}
+
+{% block main %}
+<div class='block' id='block1'>
+	<h2>流分布</h2>
+	<div id='container1' style='width: 1120px;height:800px;'></div>
+	<div style="color:#999;text-align:center">Designed by Zining Dong. Data Source: Qifan Ren.</div>
+</div>
+
+<script>
+var dom = document.getElementById('container1');
+var mainChart = echarts.init(dom, 'macarons');
+var app = {};
+
+var option;
+
+var chart1 = {{ chart1 | safe }};
+
+var yAxis1 = [
+	{
+		type: 'log',
+		min: function(value) { return Math.max(0.9, value.min * 0.9); },
+		axisLine: {
+			onZero: false
+		},
+		axisLabel: {
+			showMinLabel: false
+		},
+		gridIndex: 0,
+	},
+	{
+		type: 'log',
+		min: function(value) { return Math.max(0.9, value.min * 0.9); },
+		axisLine: {
+			onZero: false
+		},
+		axisLabel: {
+			showMinLabel: false
+		},
+		gridIndex: 1,
+	},
+];
+
+var yAxis2 = [
+	{
+		type: 'value',
+		axisLine: {
+			onZero: false
+		},
+		axisLabel: {
+			showMinLabel: false
+		},
+		gridIndex: 0,
+	},
+	{
+		type: 'value',
+		axisLine: {
+			onZero: false
+		},
+		axisLabel: {
+			showMinLabel: false
+		},
+		gridIndex: 1,
+	},
+];
+
+var tooltip1 = {
+	trigger: 'axis',
+	formatter: function (params)
+	{
+		var str = '';
+		try
+		{
+			str += '<strong>Length: ' + params[0].name + '</strong><br>';
+			for (let i in params)
+			{
+				str += params[i].marker + ' ' + params[i].seriesName + '　 <strong>' + Math.floor(params[i].value) + '</strong><br>';
+			}
+		}
+		catch (err)
+		{
+			console.log(err);
+		}
+		return str;
+	}
+};
+
+var tooltip2 = {
+	trigger: 'item',
+	formatter: function (params)
+	{
+		var str = '';
+		try
+		{
+			str += params.marker + ' <strong>Length' + params.name + '</strong><br>'
+			str += '　 <strong>' + params.value + ' (' + Math.round(params.percent) + '%)</strong><br>';
+		}
+		catch (err)
+		{
+			console.log(err);
+		}
+		return str;
+	}
+};
+
+option = {
+	toolbox: {
+		feature: {
+			dataView: {},
+			restore: {},
+			saveAsImage: {}
+		}
+	},
+	legend: [
+		{
+			left: '7%',
+			top: '7%',
+			orient: 'vertical',
+			itemGap: 12,
+			data: ['Client 1', 'Client 2', 'Client 3', 'Client 4', 'Client 5',
+				'Client 6', 'Client 7', 'Client 8']
+		}
+	],
+	tooltip: tooltip1,
+	grid: [
+		{
+			left: '3%',
+			right: '30%',
+			top: '38%',
+			bottom: '15%',
+			containLabel: true
+		},
+		{
+			left: '16%',
+			right: '30%',
+			top: '6%',
+			bottom: '65%',
+			containLabel: true
+		},
+	],
+	dataZoom: [
+		{
+			type: 'inside',
+			xAxisIndex: 0,
+			fiterMode: 'filter',
+			bottom: '15%',
+		},
+		{
+			type: 'inside',
+			xAxisIndex: 1,
+			fiterMode: 'filter',
+			bottom: '15%',
+			startValue: 1,
+			endValue: 200
+		}
+	],
+	xAxis: [
+		{
+			type: 'category',
+			gridIndex: 0,
+			min: 2,
+			axisTick: {
+				interval: 19
+			},
+			axisLabel: {
+				interval: 19,
+			},
+			data: chart1['xaxisdata']
+		},
+		{
+			type: 'category',
+			gridIndex: 1,
+			min: 1,
+			data: chart1['antxaxisdata']
+		},
+
+	],
+	yAxis: [
+		{
+			id: 'yAxis1',
+			type: 'log',
+			min: function(value) { return Math.max(0.9, value.min * 0.9); },
+			axisLine: {
+				onZero: false
+			},
+			axisLabel: {
+				showMinLabel: false
+			},
+			gridIndex: 0,
+		},
+		{
+			id: 'yAxis2',
+			type: 'log',
+			min: function(value) { return Math.max(0.9, value.min * 0.9); },
+			axisLine: {
+				onZero: false
+			},
+			axisLabel: {
+				showMinLabel: false
+			},
+			gridIndex: 1,
+		},
+	],
+	series: [
+		{
+			id: 'line1',
+			name: 'Client 1',
+			type: 'line',
+			xAxisIndex: 0,
+			yAxisIndex: 0,
+			stack: 'All',
+			smooth: true,
+			tooltip: {
+				trigger: 'axis'
+			},
+			lineStyle: {
+				width: 0
+			},
+			showSymbol: false,
+			areaStyle: {
+				opacity: 0.8,
+			},
+			emphasis: {
+				focus: 'series'
+			},
+			data:  chart1['linedata1']['Client 1']
+		},
+		{
+			id: 'line2',
+			name: 'Client 2',
+			type: 'line',
+			xAxisIndex: 0,
+			yAxisIndex: 0,
+			stack: 'All',
+			smooth: true,
+			lineStyle: {
+				width: 0
+			},
+			showSymbol: false,
+			areaStyle: {
+				opacity: 0.8,
+			},
+			emphasis: {
+				focus: 'series'
+			},
+			data:  chart1['linedata1']['Client 2']
+		},
+		{
+			id: 'line3',
+			name: 'Client 3',
+			type: 'line',
+			xAxisIndex: 0,
+			yAxisIndex: 0,
+			stack: 'All',
+			smooth: true,
+			lineStyle: {
+				width: 0
+			},
+			showSymbol: false,
+			areaStyle: {
+				opacity: 0.8,
+			},
+			emphasis: {
+				focus: 'series'
+			},
+			data:  chart1['linedata1']['Client 3']
+		},
+		{
+			id: 'line4',
+			name: 'Client 4',
+			type: 'line',
+			xAxisIndex: 0,
+			yAxisIndex: 0,
+			stack: 'All',
+			smooth: true,
+			lineStyle: {
+				width: 0
+			},
+			showSymbol: false,
+			areaStyle: {
+				opacity: 0.8,
+			},
+			emphasis: {
+				focus: 'series'
+			},
+			data:  chart1['linedata1']['Client 4']
+		},
+		{
+			id: 'line5',
+			name: 'Client 5',
+			type: 'line',
+			xAxisIndex: 0,
+			yAxisIndex: 0,
+			stack: 'All',
+			smooth: true,
+			lineStyle: {
+				width: 0
+			},
+			showSymbol: false,
+			areaStyle: {
+				opacity: 0.8,
+			},
+			emphasis: {
+				focus: 'series'
+			},
+			data:  chart1['linedata1']['Client 5']
+		},
+		{
+			id: 'line6',
+			name: 'Client 6',
+			type: 'line',
+			xAxisIndex: 0,
+			yAxisIndex: 0,
+			stack: 'All',
+			smooth: true,
+			lineStyle: {
+				width: 0
+			},
+			showSymbol: false,
+			areaStyle: {
+				opacity: 0.8,
+			},
+			emphasis: {
+				focus: 'series'
+			},
+			data:  chart1['linedata1']['Client 6']
+		},
+		{
+			id: 'line7',
+			name: 'Client 7',
+			type: 'line',
+			xAxisIndex: 0,
+			yAxisIndex: 0,
+			stack: 'All',
+			smooth: true,
+			lineStyle: {
+				width: 0
+			},
+			showSymbol: false,
+			areaStyle: {
+				opacity: 0.8,
+			},
+			emphasis: {
+				focus: 'series'
+			},
+			data:  chart1['linedata1']['Client 7']
+		},
+		{
+			id: 'line8',
+			name: 'Client 8',
+			type: 'line',
+			xAxisIndex: 0,
+			yAxisIndex: 0,
+			stack: 'All',
+			smooth: true,
+			lineStyle: {
+				width: 0
+			},
+			showSymbol: false,
+			areaStyle: {
+				opacity: 0.8,
+			},
+			emphasis: {
+				focus: 'series'
+			},
+			data:  chart1['linedata1']['Client 8']
+		},
+		{
+			id: 'antline1',
+			name: 'Client 1',
+			type: 'line',
+			xAxisIndex: 1,
+			yAxisIndex: 1,
+			stack: 'Ant',
+			smooth: true,
+			tooltip: {
+				trigger: 'axis'
+			},
+			lineStyle: {
+				width: 0
+			},
+			showSymbol: false,
+			areaStyle: {
+				opacity: 0.8,
+			},
+			emphasis: {
+				focus: 'series'
+			},
+			data:  chart1['antlinedata1']['Client 1']
+		},
+		{
+			id: 'antline2',
+			name: 'Client 2',
+			type: 'line',
+			xAxisIndex: 1,
+			yAxisIndex: 1,
+			stack: 'Ant',
+			smooth: true,
+			lineStyle: {
+				width: 0
+			},
+			showSymbol: false,
+			areaStyle: {
+				opacity: 0.8,
+			},
+			emphasis: {
+				focus: 'series'
+			},
+			data:  chart1['antlinedata1']['Client 2']
+		},
+		{
+			id: 'antline3',
+			name: 'Client 3',
+			type: 'line',
+			xAxisIndex: 1,
+			yAxisIndex: 1,
+			stack: 'Ant',
+			smooth: true,
+			lineStyle: {
+				width: 0
+			},
+			showSymbol: false,
+			areaStyle: {
+				opacity: 0.8,
+			},
+			emphasis: {
+				focus: 'series'
+			},
+			data:  chart1['antlinedata1']['Client 3']
+		},
+		{
+			id: 'antline4',
+			name: 'Client 4',
+			type: 'line',
+			xAxisIndex: 1,
+			yAxisIndex: 1,
+			stack: 'Ant',
+			smooth: true,
+			lineStyle: {
+				width: 0
+			},
+			showSymbol: false,
+			areaStyle: {
+				opacity: 0.8,
+			},
+			emphasis: {
+				focus: 'series'
+			},
+			data:  chart1['antlinedata1']['Client 4']
+		},
+		{
+			id: 'antline5',
+			name: 'Client 5',
+			type: 'line',
+			xAxisIndex: 1,
+			yAxisIndex: 1,
+			stack: 'Ant',
+			smooth: true,
+			lineStyle: {
+				width: 0
+			},
+			showSymbol: false,
+			areaStyle: {
+				opacity: 0.8,
+			},
+			emphasis: {
+				focus: 'series'
+			},
+			data:  chart1['antlinedata1']['Client 5']
+		},
+		{
+			id: 'antline6',
+			name: 'Client 6',
+			type: 'line',
+			xAxisIndex: 1,
+			yAxisIndex: 1,
+			stack: 'Ant',
+			smooth: true,
+			lineStyle: {
+				width: 0
+			},
+			showSymbol: false,
+			areaStyle: {
+				opacity: 0.8,
+			},
+			emphasis: {
+				focus: 'series'
+			},
+			data:  chart1['antlinedata1']['Client 6']
+		},
+		{
+			id: 'antline7',
+			name: 'Client 7',
+			type: 'line',
+			xAxisIndex: 1,
+			yAxisIndex: 1,
+			stack: 'Ant',
+			smooth: true,
+			lineStyle: {
+				width: 0
+			},
+			showSymbol: false,
+			areaStyle: {
+				opacity: 0.8,
+			},
+			emphasis: {
+				focus: 'series'
+			},
+			data:  chart1['antlinedata1']['Client 7']
+		},
+		{
+			id: 'antline8',
+			name: 'Client 8',
+			type: 'line',
+			xAxisIndex: 1,
+			yAxisIndex: 1,
+			stack: 'Ant',
+			smooth: true,
+			lineStyle: {
+				width: 0
+			},
+			showSymbol: false,
+			areaStyle: {
+				opacity: 0.8,
+			},
+			emphasis: {
+				focus: 'series'
+			},
+			data:  chart1['antlinedata1']['Client 8']
+		},
+		{
+			id: 'pie1',
+			type: 'pie',
+			center: ['85%', '28%'],
+			radius: ['15%', '25%'],
+			avoidLabelOverlap: false,
+			tooltip: {
+				trigger: 'item'
+			},
+			label: {
+				position: 'inside',
+				fontWeight: 'bold',
+				textBorderColor: 'rgba(255,255,255,0.6)',
+				textBorderWidth: 4,
+				rotate: 'radial'
+			},
+			labelLine: {
+				show: false
+			},
+			emphasis: {
+				focus: 'series'
+			},
+			minAngle: 5,
+			data: chart1['piedata1']['total']
+		},
+		{
+			id: 'pie2',
+			type: 'pie',
+			center: ['85%', '27%'],
+			radius: ['0%'],
+			tooltip: { show: false },
+			color: 'rgba(0, 0, 0, 0)',
+			label: {
+				position: 'center',
+				fontSize: 22,
+				fontWeight: 'bold',
+				textBorderColor: 'rgba(255,255,255,0.6)',
+				textBorderWidth: 4
+			},
+			data: [ { 'name': '总流数', 'value': 1 } ]
+		},
+		{
+			id: 'pie3',
+			type: 'pie',
+			center: ['85%', '30%'],
+			radius: ['0%'],
+			tooltip: { show: false },
+			color: 'rgba(0, 0, 0, 0)',
+			label: {
+				position: 'center',
+				fontSize: 16,
+				textBorderColor: 'rgba(255,255,255,0.6)',
+				textBorderWidth: 4
+			},
+			data: [ { 'name': chart1['flowall'][8], 'value': 1 } ]
+		},
+		{
+			id: 'gauge1',
+			type: 'gauge',
+			center: ['85%', '65%'],
+			radius: '27%',
+			startAngle: 215,
+			endAngle: -35,
+			title: {
+				fontSize: 20,
+				textBorderColor: 'rgba(255,255,255,0.6)',
+				textBorderWidth: 4,
+				offsetCenter : [0, '65%']
+			},
+			detail: {
+				formatter: '{value}',
+				fontSize: 22,
+				textBorderColor: 'rgba(255,255,255,0.6)',
+				textBorderWidth: 4,
+			},
+			pointer: {
+				show : true,
+				itemStyle: {
+					color : '#2EC7C9'
+				}
+			},
+			axisLine: {
+				show : true,
+				lineStyle: {
+					color : 
+					[
+						[ 1, new echarts.graphic.LinearGradient(
+							1, 0, 0, 0,
+							[{ offset: 0, color: '#2EC7C9' },
+							{offset: 0.8, color: '#E6EBF8' }] )]
+					],
+				}
+			},
+			data: [{
+				value: chart1.entropy[8][0],
+				name: 'Entropy',
+				pointer: { itemStyle: { color : 'rgba(0, 0, 0, 0)' } }
+			}, {
+				value: chart1.entropy[8][0],
+				name: 'x' + chart1.entropy[8][1],
+				title: {
+					fontSize: 12,
+					offsetCenter : ['28%', '20%']
+				},
+			}]
+		}
+	],
+	graphic: [
+		{
+			name: 'Group 1',
+			type: 'group',
+			right: '2%',
+			top: '6%',
+			z: 100,
+			children:[
+				{
+					type: 'rect',
+					top: 'center',
+					left: 'center',
+					shape:{
+						width: 100,
+						height: 30,
+						r: 15
+					},
+					style: {
+						fill: 'rgba(255,255,255,0.6)',
+						stroke: "#2ec7c9",
+						lineWidth: 3
+					}
+				},
+				{
+					type: 'text',
+					top: 'center',
+					left: 'center',
+					style:{
+						text: '流数/流量',
+						textAlign: 'center',
+						fill: '#000000',
+						fontSize: 16,
+						fontWeight: 'bold',
+					}
+				}
+			]
+		},
+		{
+			type: 'text',
+			top: '8%',
+			right: '31%',
+			style:{
+				text: 'Distribution (Ant Flows)',
+				fill: 'rgba(0, 0, 0, 0.9)',
+				fontSize: 16,
+				fontWeight: 'bold',
+			}
+		},
+		{
+			type: 'text',
+			top: '40%',
+			right: '31%',
+			style:{
+				text: 'Distribution (Overall)',
+				fill: 'rgba(0, 0, 0, 0.9)',
+				fontSize: 18,
+				fontWeight: 'bold',
+			}
+		}
+	]
+};
+
+var triggerAction = function(action, selected) {
+	legend = [];
+	for (name in selected) {
+		if (selected.hasOwnProperty(name)) {
+			legend.push({name: name});
+		}
+	}
+	mainChart.dispatchAction({
+		type: action,
+		batch: legend
+	});
+};
+
+mainChart.on('mouseover', 'series.pie', function(obj) {
+	mainChart.setOption({ tooltip: tooltip2, notMerge: true });
+})
+
+mainChart.on('mouseout', 'series.pie', function(obj) {
+	mainChart.setOption({ tooltip: tooltip1, notMerge: true });
+})
+
+var nowdata = 1;
+
+mainChart.on('legendselectchanged', function(obj) {
+	var selected = obj.selected;
+	var legend = obj.name;
+
+	var selectedCount = 0;
+	if (selected != undefined)
+	{
+		for (name in selected)
+			if (selected[name] == true)
+				++selectedCount;
+		if (selectedCount === 0) {
+			if (nowdata === 1)
+			{
+				mainChart.setOption({ series: { id: 'pie1', data: chart1['piedata1']['total'] }});
+				mainChart.setOption({ series: { id: 'pie2', data: [ { 'name': '总流数', 'value': 1 } ] }});
+				mainChart.setOption({ series: { id: 'pie3', data: [ { 'name': chart1['flowall'][8], 'value': 1 } ] }});
+			}
+			else
+			{
+				mainChart.setOption({ series: { id: 'pie1', data: chart1['piedata2']['total'] }});
+				mainChart.setOption({ series: { id: 'pie2', data: [ { 'name': '总流量', 'value': 1 } ] }});
+				mainChart.setOption({ series: { id: 'pie3', data: [ { 'name': chart1['pktall'][8], 'value': 1 } ] }});
+			}
+			mainChart.setOption({ series: { id: 'gauge1', data: [{ value: chart1.entropy[8][0], name: 'Entropy', pointer: { itemStyle: { color : 'rgba(0, 0, 0, 0)' } } },
+				{ value: chart1.entropy[8][0], name: 'x' + chart1.entropy[8][1], title: { fontSize: 12, offsetCenter : ['28%', '20%'] } }] } });
+			triggerAction('legendToggleSelect', selected);
+		}
+		else {
+			if (nowdata === 1)
+			{
+				mainChart.setOption({ series: { id: 'pie1', data: chart1['piedata1'][legend] }});
+				mainChart.setOption({ series: { id: 'pie2', data: [ { 'name': legend, 'value': 1 } ] }});
+				mainChart.setOption({ series: { id: 'pie3', data: [ { 'name': chart1['flowall'][legend[7]-1], 'value': 1 } ] }});
+			}
+			else
+			{
+				mainChart.setOption({ series: { id: 'pie1', data: chart1['piedata2'][legend] }});
+				mainChart.setOption({ series: { id: 'pie2', data: [ { 'name': legend, 'value': 1 } ] }});
+				mainChart.setOption({ series: { id: 'pie3', data: [ { 'name': chart1['pktall'][legend[7]-1], 'value': 1 } ] }});
+			}
+			mainChart.setOption({ series: { id: 'gauge1', data: [{ value: chart1.entropy[legend[7]-1][0], name: 'Entropy', pointer: { itemStyle: { color : 'rgba(0, 0, 0, 0)' } } },
+				{ value: chart1.entropy[legend[7]-1][0], name: 'x' + chart1.entropy[legend[7]-1][1], title: { fontSize: 12, offsetCenter : ['28%', '20%'] } }] } });
+			if (selectedCount === 7)
+				triggerAction('legendToggleSelect', selected);
+			else
+				for (name in selected)
+					if (name != legend && selected[name] == true)
+						mainChart.dispatchAction({type: 'legendToggleSelect', batch: [{name: name}]});
+		}
+	}
+});
+
+mainChart.on('click', 'graphic', function(obj) {
+	if (nowdata === 1)
+	{
+		nowdata = 2;
+		mainChart.setOption({ series: { id: 'line1', data: chart1['linedata2']['Client 1'] }});
+		mainChart.setOption({ series: { id: 'line2', data: chart1['linedata2']['Client 2'] }});
+		mainChart.setOption({ series: { id: 'line3', data: chart1['linedata2']['Client 3'] }});
+		mainChart.setOption({ series: { id: 'line4', data: chart1['linedata2']['Client 4'] }});
+		mainChart.setOption({ series: { id: 'line5', data: chart1['linedata2']['Client 5'] }});
+		mainChart.setOption({ series: { id: 'line6', data: chart1['linedata2']['Client 6'] }});
+		mainChart.setOption({ series: { id: 'line7', data: chart1['linedata2']['Client 7'] }});
+		mainChart.setOption({ series: { id: 'line8', data: chart1['linedata2']['Client 8'] }});
+		mainChart.setOption({ series: { id: 'antline1', data: chart1['antlinedata2']['Client 1'] }});
+		mainChart.setOption({ series: { id: 'antline2', data: chart1['antlinedata2']['Client 2'] }});
+		mainChart.setOption({ series: { id: 'antline3', data: chart1['antlinedata2']['Client 3'] }});
+		mainChart.setOption({ series: { id: 'antline4', data: chart1['antlinedata2']['Client 4'] }});
+		mainChart.setOption({ series: { id: 'antline5', data: chart1['antlinedata2']['Client 5'] }});
+		mainChart.setOption({ series: { id: 'antline6', data: chart1['antlinedata2']['Client 6'] }});
+		mainChart.setOption({ series: { id: 'antline7', data: chart1['antlinedata2']['Client 7'] }});
+		mainChart.setOption({ series: { id: 'antline8', data: chart1['antlinedata2']['Client 8'] }});
+		mainChart.setOption({ series: { id: 'pie1', data: chart1['piedata2']['total'] }});
+		mainChart.setOption({ series: { id: 'pie2', data: [ { 'name': '总流量', 'value': 1 } ] }});
+		mainChart.setOption({ series: { id: 'pie3', data: [ { 'name': chart1['pktall'][8], 'value': 1 } ] }});
+		mainChart.setOption({ yAxis: yAxis2 });
+	}
+	else if (nowdata === 2)
+	{
+		nowdata = 1;
+		mainChart.setOption({ series: { id: 'line1', data: chart1['linedata1']['Client 1'] }});
+		mainChart.setOption({ series: { id: 'line2', data: chart1['linedata1']['Client 2'] }});
+		mainChart.setOption({ series: { id: 'line3', data: chart1['linedata1']['Client 3'] }});
+		mainChart.setOption({ series: { id: 'line4', data: chart1['linedata1']['Client 4'] }});
+		mainChart.setOption({ series: { id: 'line5', data: chart1['linedata1']['Client 5'] }});
+		mainChart.setOption({ series: { id: 'line6', data: chart1['linedata1']['Client 6'] }});
+		mainChart.setOption({ series: { id: 'line7', data: chart1['linedata1']['Client 7'] }});
+		mainChart.setOption({ series: { id: 'line8', data: chart1['linedata1']['Client 8'] }});
+		mainChart.setOption({ series: { id: 'antline1', data: chart1['antlinedata1']['Client 1'] }});
+		mainChart.setOption({ series: { id: 'antline2', data: chart1['antlinedata1']['Client 2'] }});
+		mainChart.setOption({ series: { id: 'antline3', data: chart1['antlinedata1']['Client 3'] }});
+		mainChart.setOption({ series: { id: 'antline4', data: chart1['antlinedata1']['Client 4'] }});
+		mainChart.setOption({ series: { id: 'antline5', data: chart1['antlinedata1']['Client 5'] }});
+		mainChart.setOption({ series: { id: 'antline6', data: chart1['antlinedata1']['Client 6'] }});
+		mainChart.setOption({ series: { id: 'antline7', data: chart1['antlinedata1']['Client 7'] }});
+		mainChart.setOption({ series: { id: 'antline8', data: chart1['antlinedata1']['Client 8'] }});
+		mainChart.setOption({ series: { id: 'pie1', data: chart1['piedata1']['total'] }});
+		mainChart.setOption({ series: { id: 'pie2', data: [ { 'name': '总流数', 'value': 1 } ] }});
+		mainChart.setOption({ series: { id: 'pie3', data: [ { 'name': chart1['flowall'][8], 'value': 1 } ] }});
+		mainChart.setOption({ yAxis: yAxis1 });
+	}
+});
+
+mainChart.setOption(option);
+</script>
+{% endblock %}
