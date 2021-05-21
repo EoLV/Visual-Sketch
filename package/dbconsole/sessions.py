@@ -4,6 +4,9 @@ import traceback
 import time
 import json
 import sys
+from functools import reduce
+
+convert_endian = lambda x: reduce(lambda a, b: a + b, [x//(256**i)%256*(256**(3-i)) for i in range(3,-1,-1)][::-1])
 
 def save_elastic_session(session, data, Attribute, Heavypart, Distribution):
 	try:
@@ -34,15 +37,18 @@ def save_elastic_session(session, data, Attribute, Heavypart, Distribution):
 			cnt += 1
 			if cnt > 1:
 				cmd.append(',')
-			cmd.append('(' + str(r[0]) + ',' + str(r[1]) + ',' + str(r[2]) + ',' + str(r[3]) + ',\''
+			cmd.append('(' + str(convert_endian(r[0])) + ',' + str(r[2]) + ',' + str(convert_endian(r[1])) + ',' + str(r[3]) + ',\''
 				+ str(r[4]) + '\',' + str(r[5]) + ',' + str(r[6]) + ')')
-		session.execute(text(''.join(cmd)))
+		if cnt > 0:
+			session.execute(text(''.join(cmd)))
 
 		for i in range(len(data['Distribution'])):
 			s = 'INSERT INTO %s (Client, Length, Num) VALUES ' %Distribution.__tablename__
 			cmd = [s]
 			cnt = 0
-			for l, n in data['Distribution'][i].items():
+			for t in data['Distribution'][i]:
+				l = t[0]
+				n = t[1]
 				cnt += 1
 				if cnt > 1:
 					cmd.append(',')
@@ -57,7 +63,7 @@ def save_elastic_session(session, data, Attribute, Heavypart, Distribution):
 		session.close()
 		print('post fin!')
 		print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-		return 'upload completed'
+		return 'upload completed\n'
 	except:
 		traceback.print_exc()
 		session.rollback()

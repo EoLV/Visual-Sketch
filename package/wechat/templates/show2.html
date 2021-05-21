@@ -107,6 +107,7 @@ var option = {
 	toolbox: {
 		feature: {
 			dataView: {},
+			restore: {},
 			saveAsImage: {}
 		}
 	},
@@ -142,8 +143,8 @@ var option = {
 			xAxisIndex: 0,
 			fiterMode: 'filter',
 			bottom: '15%',
-			startValue: 3,
-			end: 90
+			startValue: 2,
+			end: 30
 		},
 		{
 			type: 'inside',
@@ -151,7 +152,7 @@ var option = {
 			fiterMode: 'filter',
 			bottom: '15%',
 			startValue: 1,
-			endValue: 50
+			endValue: 100
 		}
 	],
 	xAxis: [
@@ -682,7 +683,7 @@ mainChart.on('legendselectchanged', function(obj) {
 			}
 			else
 			{
-				mainChart.setOption({ series: { id: 'pie1', data: chart1['piedata1']['total'] }});
+				mainChart.setOption({ series: { id: 'pie1', data: chart1['piedata2']['total'] }});
 				mainChart.setOption({ series: { id: 'pie2', data: [ { 'name': '总流量', 'value': 1 } ] }});
 				mainChart.setOption({ series: { id: 'pie3', data: [ { 'name': chart1['pktall'][8], 'value': 1 } ] }});
 			}
@@ -699,7 +700,7 @@ mainChart.on('legendselectchanged', function(obj) {
 			}
 			else
 			{
-				mainChart.setOption({ series: { id: 'pie1', data: chart1['piedata1'][legend] }});
+				mainChart.setOption({ series: { id: 'pie1', data: chart1['piedata2'][legend] }});
 				mainChart.setOption({ series: { id: 'pie2', data: [ { 'name': legend, 'value': 1 } ] }});
 				mainChart.setOption({ series: { id: 'pie3', data: [ { 'name': chart1['pktall'][legend[7]-1], 'value': 1 } ] }});
 			}
@@ -789,7 +790,6 @@ var draw = function(data)
 {
 	chart1 = data;
 	mainChart.clear();
-	nowdata = 1;
 	var visoption = setOptionData(option, chart1);
 	mainChart.setOption(visoption);
 }

@@ -36,6 +36,7 @@ option = {
 	toolbox: {
 		feature: {
 			dataView: {},
+			restore: {},
 			saveAsImage: {}
 		}
 	},
@@ -250,7 +251,7 @@ var setOptionData = function(option, chart1)
 			name: 'Total Traffic',
 		}, {
 			value: chart1.gauge1data[0],
-			name: 'x' + chart1.gauge1data[1],
+			name: 'x' + chart1.gauge1data[1] + 'M',
 			pointer: { show : false },
 			title: {
 				fontSize: 12,

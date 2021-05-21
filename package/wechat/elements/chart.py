@@ -29,7 +29,7 @@ def distrchart(data, attrid):
 	f = data.distribution(attrid)
 	attr = data.attrid()[attrid]
 
-	xaxisdata = f[10]
+	xaxisdata = [i * 100 for i in range(0, f[9] + 1)]
 
 	linedata1 = {}
 	for i in range(8):
@@ -83,11 +83,11 @@ def distrchart(data, attrid):
 	pktall = f[5].copy()
 	pktall.append(reduce(lambda x, y: x + y, f[5]))
 
-	basevalue = lambda x : max(math.ceil(math.log10(x + 1) - 2), 0)
+	maxvalue = lambda x : math.ceil(math.log10(x + 1) - 2)
 
 	entropy = f[6].copy()
 	entropy.append(float(attr[3]))
-	entropy = list(map(lambda x: [round(x / 10 ** basevalue(x), 2), 10 ** basevalue(x)], entropy))
+	entropy = list(map(lambda x: [round(x / 10 ** maxvalue(x), 2), 10 ** maxvalue(x)], entropy))
 
 	return {'xaxisdata': xaxisdata, 'linedata1': linedata1, 'linedata2': linedata2,
 		'antxaxisdata': antxaxisdata, 'antlinedata1': antlinedata1, 'antlinedata2': antlinedata2, 
@@ -97,7 +97,7 @@ def distrchart(data, attrid):
 def trafficchart(data, attrid):
 	f = data.traffic(attrid)
 	attr = data.attrid()[attrid]
-	print(f)
+
 	sunburstdata = []
 	for i in range(8):
 		datai = {}
@@ -163,11 +163,11 @@ def trafficchart(data, attrid):
 					[191,68,76], [240, 217, 156]) }
 				})
 
-	basevalue = lambda x : max(math.ceil(math.log10(x + 1) - 2), 0)
+	maxvalue = lambda x : math.ceil(math.log10(x + 1) - 2)
 
-	t1 = basevalue(f[4])
-	gauge1data = [round(f[4] / 10 ** t1, 2), 10 ** t1]
-	t2 = basevalue(f[5])
+	t1 = maxvalue(f[4])
+	gauge1data = [round(f[4] / 10 ** t1, 2), 10 ** (t1 - 6)]
+	t2 = maxvalue(f[5])
 	gauge2data = [round(f[5] / 10 ** t2, 2), 10 ** t2]
 
 	return { 'sunburstdata': sunburstdata, 'heatmapdata': heatmapdata,
@@ -181,15 +181,15 @@ def elephantchart(data, attrid):
 	elephantdata = []
 	for i in f:
 		now = {
-			'name': 'Client ' + str(data.iptocid(i[2]) + 1),
+			'name': 'Client ' + str((i[2]+7) % 8 + 1),
 			'value': [len(elephantdata) + 1, i[5]],
 			'ID': i[7],
 			'itemStyle': {
-				'color': getcolor(1, stylecolor(data.iptocid(i[2]))),
+				'color': getcolor(1, stylecolor((i[2]+7) % 8)),
 			}
 		}
 		if i[6]:
-			now['itemStyle']['borderColor'] = getcolor(0.5, stylecolor(data.iptocid(i[2])))
+			now['itemStyle']['borderColor'] = getcolor(0.5, stylecolor((i[2]+7) % 8))
 			now['itemStyle']['borderWidth'] = 2
 		elephantdata.append(now)
 	swaptdata = []
@@ -197,14 +197,14 @@ def elephantchart(data, attrid):
 		if not i[6]:
 			continue
 		now = {
-			'name': 'Client ' + str(data.iptocid(i[2]) + 1),
+			'name': 'Client ' + str((i[2]+7) % 8 + 1),
 			'value': [len(swaptdata) + 1, i[5]],
 			'ID': i[7],
 			'itemStyle': {
-				'color': getcolor(1, stylecolor(data.iptocid(i[2]))),
+				'color': getcolor(1, stylecolor((i[2]+7) % 8)),
 			}
 		}
-		now['itemStyle']['borderColor'] = getcolor(0.5, stylecolor(data.iptocid(i[2])))
+		now['itemStyle']['borderColor'] = getcolor(0.5, stylecolor((i[2]+7) % 8))
 		now['itemStyle']['borderWidth'] = 2
 		swaptdata.append(now)
 
