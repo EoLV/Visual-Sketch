@@ -3,22 +3,36 @@
 {% block title %}网络可视化展示平台{% endblock %}
 
 {% block main %}
-<div class="block" id="block1">
-	<h2>总流量</h2>
-	<div id="container1" style="position:absolute;left:5%;width:90%;top:10%;height:90%"></div>
-	<div style="color:#999;position:absolute;bottom:5%;right:10%">Designed by Zining Dong. Data Source: Qifan Ren.</div>
+<div class="titleblock" style="position:absolute;left:8%;right:8%;top:5%;bottom:85%;">
+	<h2>流量信息</h2>
 </div>
 
+<div class="block" id="block1" style="position:absolute;left:8%;right:44%;top:18%;bottom:8%">
+	<h3>整体流量</h3><hr>
+	<div id="container1" style="position:absolute;left:5%;width:90%;top:10%;height:87%"></div>
+</div>
+
+<div class="block" id="block2" style="position:absolute;left:58%;right:8%;top:18%;bottom:35%">
+	<h3>数据活跃度</h3><hr>
+	<div id="container2" style="position:absolute;left:8%;width:84%;top:8%;height:90%"></div>
+</div>
+
+<div class="block" id="block3" style="position:absolute;left:58%;right:26%;top:67%;bottom:8%">
+	<div id="container3" style="position:absolute;left:3%;width:94%;top:10%;height:80%"></div>
+</div>
+
+<div class="block" id="block4" style="position:absolute;left:76%;right:8%;top:67%;bottom:8%">
+	<div id="container4" style="position:absolute;left:3%;width:94%;top:10%;height:80%"></div>
+</div>
+
+<div style="color:#999;position:absolute;bottom:3%;right:8%">2021 Designed by Zining Dong.</div>
+
 <script>
-var dom = document.getElementById("container1");
-var mainChart = echarts.init(dom, 'macarons');
-
-var chart1;
-
-var option;
 
 var formatter1 = function (params)
 {
+	if (!params.name)
+		return '返回上一级';
 	var str = params.marker + ' ' + params.name + '<br>';
 	str += '　 <strong>' + params.data.traffic + ' packets</strong><br>';
 	str += '　 <strong>' + params.data.flow + ' flows</strong>';
@@ -30,12 +44,92 @@ var formatter2 = function (params)
 	var str = params.value[1] + '&gt&gt' + params.value[0] + '<br>';
 	str += params.marker + ' <strong>' + params.value[2] + '%</strong>';
 	return str;
-}
+};
 
-option = {
+var optionSunburst = {
 	toolbox: {
+		show: true,
 		feature: {
-			dataView: {},
+			saveAsImage: {}
+		}
+	},
+	tooltip: {
+		trigger: 'item'
+	},
+	series: [
+		{
+			center: ['50%', '50%'],
+			type: 'sunburst',
+			sort: null,
+			tooltip: {
+				formatter: formatter1
+			},
+			emphasis: {
+				focus: 'ancestor'
+			},
+			label: {
+				rotate: 'radial'
+			},
+			levels: [{
+				tooltip: {
+					show: false
+				},
+				itemStyle: {
+					color: '#ccc'
+				},
+			}, {
+				r0: '30%',
+				r: '58%',
+				nodeClick: 'rootToNode',
+				label: {
+				},
+			}, {
+				r0: '58%',
+				r: '68%',
+				nodeClick: 'rootToNode',
+				itemStyle: {
+					borderMiterLimit: 10
+				},
+				label: {
+					rotate: 'tangential'
+				}
+			}, {
+				r0: '68%',
+				r: '95%',
+				nodeClick: false,
+				itemStyle: {
+					borderMiterLimit: 10
+				},
+				label: {
+					align: 'right'
+				}
+			}],
+			itemStyle: {
+				borderWidth: 2
+			},
+		}, {
+			id: 'title1',
+			type: 'pie',
+			center: ['50%', '50%'],
+			radius: ['0%'],
+			tooltip: { show: false },
+			color: 'rgba(0, 0, 0, 0)',
+			label: {
+				position: 'center',
+				fontSize: 30,
+				fontWeight: 'bold',
+				textBorderColor: 'rgba(255,255,255,0.6)',
+				textBorderWidth: 4
+			},
+			data: [ { 'name': 'Traffic', 'value': 1 } ]
+		}
+	]
+};
+
+var optionHeatmap = {
+	toolbox: {
+		show: true,
+		feature: {
 			saveAsImage: {}
 		}
 	},
@@ -43,7 +137,7 @@ option = {
 		trigger: 'item'
 	},
 	grid: [
-		{left: '60%', right: '6%', top: '10%', bottom: '45%', containLabel: true}
+		{left: '0%', right: '10%', top: '10%', bottom: '0%', containLabel: true}
 	],
 	xAxis: [
 		{
@@ -76,57 +170,6 @@ option = {
 	],
 	series: [
 		{
-			center: ['30%', '45%'],
-			type: 'sunburst',
-			sort: null,
-			tooltip: {
-				formatter: formatter1
-			},
-			emphasis: {
-				focus: 'ancestor'
-			},
-			label: {
-				rotate: 'radial'
-			},
-			levels: [{
-				tooltip: {
-					show: false
-				},
-				itemStyle: {
-					color: '#ccc'
-				},
-			}, {
-				r0: '20%',
-				r: '40%',
-				nodeClick: 'rootToNode',
-				label: {
-				},
-			}, {
-				r0: '40%',
-				r: '50%',
-				nodeClick: 'rootToNode',
-				itemStyle: {
-					borderMiterLimit: 10
-				},
-				label: {
-					rotate: 'tangential'
-				}
-			}, {
-				r0: '50%',
-				r: '70%',
-				nodeClick: false,
-				itemStyle: {
-					borderMiterLimit: 10
-				},
-				label: {
-					align: 'right'
-				}
-			}],
-			itemStyle: {
-				borderWidth: 2
-			},
-		},
-		{
 			type: 'heatmap',
 			label: {
 				show: true
@@ -138,12 +181,20 @@ option = {
 				borderWidth: 2,
 				borderJoin: 'bevel'
 			},
-		},
+		}
+	]
+};
+
+var optionGauge1 = {
+	tooltip: {
+		trigger: 'item'
+	},
+	series: [
 		{
 			name: 'Traffic',
 			type: 'gauge',
-			center: ['63%', '72%'],
-			radius: '27%',
+			center: ['50%', '54%'],
+			radius: '100%',
 			startAngle: 215,
 			endAngle: -35,
 			tooltip: {
@@ -153,13 +204,14 @@ option = {
 				fontSize: 20,
 				textBorderColor: 'rgba(255,255,255,0.6)',
 				textBorderWidth: 4,
-				offsetCenter : [0, '65%']
+				offsetCenter : [0, '75%']
 			},
 			detail: {
 				formatter: '{value}',
-				fontSize: 22,
+				fontSize: 24,
 				textBorderColor: 'rgba(255,255,255,0.6)',
 				textBorderWidth: 4,
+				offsetCenter : [0, '50%']
 			},
 			pointer: {
 				show : true,
@@ -178,12 +230,20 @@ option = {
 					],
 				}
 			},
-		},
+		}
+	]
+};
+
+var optionGauge2 = {
+	tooltip: {
+		trigger: 'item'
+	},
+	series: [
 		{
-			name: 'Cardinary',
+			name: 'Flows',
 			type: 'gauge',
-			center: ['85%', '72%'],
-			radius: '27%',
+			center: ['50%', '54%'],
+			radius: '100%',
 			startAngle: 215,
 			endAngle: -35,
 			tooltip: {
@@ -193,13 +253,14 @@ option = {
 				fontSize: 20,
 				textBorderColor: 'rgba(255,255,255,0.6)',
 				textBorderWidth: 4,
-				offsetCenter : [0, '65%']
+				offsetCenter : [0, '75%']
 			},
 			detail: {
 				formatter: '{value}',
-				fontSize: 22,
+				fontSize: 24,
 				textBorderColor: 'rgba(255,255,255,0.6)',
 				textBorderWidth: 4,
+				offsetCenter : [0, '50%']
 			},
 			pointer: {
 				show : true,
@@ -218,68 +279,86 @@ option = {
 					],
 				}
 			},
-		},
-		{
-			id: 'pie1',
-			type: 'pie',
-			center: ['30%', '45%'],
-			radius: ['0%'],
-			tooltip: { show: false },
-			color: 'rgba(0, 0, 0, 0)',
-			label: {
-				position: 'center',
-				fontSize: 30,
-				fontWeight: 'bold',
-				textBorderColor: 'rgba(255,255,255,0.6)',
-				textBorderWidth: 4
-			},
-			data: [ { 'name': 'Traffic', 'value': 1 } ]
 		}
 	]
 };
 
-var setOptionData = function(option, chart1)
+var chartSunburst = echarts.init(document.getElementById("container1"), 'macarons');
+var chartHeatmap = echarts.init(document.getElementById("container2"), 'macarons');
+var chartGauge1 = echarts.init(document.getElementById("container3"), 'macarons');
+var chartGauge2 = echarts.init(document.getElementById("container4"), 'macarons');
+
+var dataset;
+
+var setOptionData = function()
 {
-	var newoption = JSON.parse(JSON.stringify(option));
-	newoption.series[0].tooltip.formatter = formatter1;
-	newoption.series[1].tooltip.formatter = formatter2;
-	newoption.series[0].data = chart1.sunburstdata;
-	newoption.series[1].data = chart1.heatmapdata;
-	newoption.series[2].data = [ {
-			value: chart1.gauge1data[0],
+	var optionTemp;
+	optionTemp = JSON.parse(JSON.stringify(optionSunburst));
+	optionTemp.series[0].tooltip.formatter = formatter1;
+	optionTemp.series[0].data = dataset.ch_sunburst;
+	chartSunburst.clear();
+	chartSunburst.setOption(optionTemp);
+
+	optionTemp = JSON.parse(JSON.stringify(optionHeatmap));
+	optionTemp.series[0].tooltip.formatter = formatter2;
+	optionTemp.series[0].data = dataset.ch_heatmap;
+	chartHeatmap.clear();
+	chartHeatmap.setOption(optionTemp);
+
+	optionTemp = JSON.parse(JSON.stringify(optionGauge1));
+	console.log(dataset)
+	optionTemp.series[0].data = [ {
+			value: dataset.ch_gauge1[0],
 			name: 'Total Traffic',
 		}, {
-			value: chart1.gauge1data[0],
-			name: 'x' + chart1.gauge1data[1],
+			value: dataset.ch_gauge1[0],
+			name: 'x' + dataset.ch_gauge1[1],
 			pointer: { show : false },
 			title: {
 				fontSize: 12,
-				offsetCenter : ['28%', '20%']
+				offsetCenter : ['28%', '25%']
 			}
 		} ];
-	newoption.series[3].data = [{
-			value: chart1.gauge2data[0],
-			name: 'Cardinary',
+	chartGauge1.clear();
+	chartGauge1.setOption(optionTemp);
+
+	optionTemp = JSON.parse(JSON.stringify(optionGauge2));
+	optionTemp.series[0].data = [{
+			value: dataset.ch_gauge2[0],
+			name: 'Flow Number',
 			itemStyle:{}
 		}, {
-			value: chart1.gauge2data[0],
-			name: 'x' + chart1.gauge2data[1],
+			value: dataset.ch_gauge2[0],
+			name: 'x' + dataset.ch_gauge2[1],
 			pointer: { show : false },
 			title: {
 				fontSize: 12,
-				offsetCenter : ['28%', '20%']
+				offsetCenter : ['28%', '25%']
 			}
 		}];
-	return newoption;
-}
+	chartGauge2.clear();
+	chartGauge2.setOption(optionTemp);
+};
 
 var draw = function(data)
 {
-	chart1 = data;
-	mainChart.clear();
-	var visoption = setOptionData(option, chart1);
-	mainChart.setOption(visoption);
-}
+	dataset = data;
+	console.log(dataset);
+	setOptionData();
+};
+
+window.onresize = function ()
+{
+	sidebarChart.resize();
+	if (chartSunburst)
+		chartSunburst.resize();
+	if (chartHeatmap)
+		chartHeatmap.resize();
+	if (chartGauge1)
+		chartGauge1.resize();
+	if (chartGauge2)
+		chartGauge2.resize();
+};
 
 </script>
 {% endblock %}

@@ -3,22 +3,187 @@
 {% block title %}网络可视化展示平台{% endblock %}
 
 {% block main %}
-<div class="block" id="block1">
-	<h2>流列表</h2>
-	<table id="container1" class="display">
-		{{ table1 | safe }}
-	</table>
+<div class="titleblock" style="position:absolute;left:8%;right:8%;top:5%;bottom:85%;">
+	<h2>系统信息</h2>
 </div>
 
+<div id="block1" style="position:absolute;left:8%;right:44%;top:18%;bottom:8%">
+	<img src="{{ url_for('static', filename='data/earth2.png') }}"
+		style="position:absolute;left:24%;width:52%;top:0%;bottom:0%;margin:auto;opacity:0.9">
+	<div id="container1" style="position:absolute;left:5%;width:90%;top:5%;height:90%"></div>
+</div>
+
+<div class="block" id="block2" style="position:absolute;left:58%;right:8%;top:18%;bottom:77%">
+	<h3 style="display:inline-block;">系统状态：　</h3>
+	<div id="sys_status" style="display: inline-block;font-family: Verdana">
+	</div>
+</div>
+
+<div class="block" id="block3" style="position:absolute;left:58%;right:8%;top:25%;bottom:66%">
+	<h3>系统运行时间</h3><hr>
+	<div id="start_time" style="font-family: Verdana"></div>
+</div>
+
+<div class="block" id="block4" style="position:absolute;left:58%;right:8%;top:36%;bottom:55%">
+	<h3>数据采集时间</h3><hr>
+	<div id="data_time" style="font-family: Verdana"></div>
+</div>
+
+<div class="block" id="block5" style="position:absolute;left:58%;right:8%;top:47%;bottom:8%">
+	<h3>客户端列表</h3><hr>
+	<div id="tablebox"></div>
+</div>
+
+<div style="color:#999;position:absolute;bottom:3%;right:8%">2021 Designed by Zining Dong.</div>
+
 <script>
-$(document).ready( function () {
-	$('#container1').addClass('table table-bordered');
-	$('#container1').DataTable( {
-		paging: false,
-		scrollY: 400,
-		searching: false,
-		autoWidth: true,
-	} );
-} );
+
+var optionGraph = {
+	tooltip: {},
+	animationDurationUpdate: 1500,
+	animationEasingUpdate: 'quinticInOut',
+	series: [
+		{
+			name: 'Clients',
+			type: 'graph',
+			layout: 'circular',
+			zoom:1,
+			label: {
+				show: true,
+				color: 'rgba(0,0,0,1)',
+				position: ['24%', '28%']
+			},
+			itemStyle: {
+				shadowBlur: 10,
+				opacity: 0.95
+			},
+			lineStyle: {
+				color: 'target',
+				curveness: 0.3,
+				opacity: 0.8,
+				width: 3
+			},
+			symbol: 'image://{{ url_for('static', filename='data/client.png') }}',
+			symbolSize: 80,
+			data: [
+				{ name: 'Client 1', category: 0 },
+				{ name: 'Client 2', category: 1 },
+				{ name: 'Client 3', category: 2 },
+				{ name: 'Client 4', category: 3 },
+				{ name: 'Client 5', category: 4 },
+				{ name: 'Client 6', category: 5 },
+				{ name: 'Client 7', category: 6 },
+				{ name: 'Client 8', category: 7 },
+			],
+			links: [
+				{ source: 0, target: 1 },
+				{ source: 0, target: 2 },
+				{ source: 0, target: 3 },
+				{ source: 0, target: 4 },
+				{ source: 0, target: 5 },
+				{ source: 0, target: 6 },
+				{ source: 0, target: 7 },
+				{ source: 1, target: 2 },
+				{ source: 1, target: 3 },
+				{ source: 1, target: 4 },
+				{ source: 1, target: 5 },
+				{ source: 1, target: 6 },
+				{ source: 1, target: 7 },
+				{ source: 2, target: 3 },
+				{ source: 2, target: 4 },
+				{ source: 2, target: 5 },
+				{ source: 2, target: 6 },
+				{ source: 2, target: 7 },
+				{ source: 3, target: 4 },
+				{ source: 3, target: 5 },
+				{ source: 3, target: 6 },
+				{ source: 3, target: 7 },
+				{ source: 4, target: 5 },
+				{ source: 4, target: 6 },
+				{ source: 4, target: 7 },
+				{ source: 5, target: 6 },
+				{ source: 5, target: 7 },
+				{ source: 6, target: 7 },
+			],
+			categories: [
+				{itemStyle: {shadowColor: "#2ec7c9"}},
+				{itemStyle: {shadowColor: "#b6a2de"}},
+				{itemStyle: {shadowColor: "#5ab1ef"}},
+				{itemStyle: {shadowColor: "#ffb980"}},
+				{itemStyle: {shadowColor: "#d87a80"}},
+				{itemStyle: {shadowColor: "#8d98b3"}},
+				{itemStyle: {shadowColor: "#e5cf0d"}},
+				{itemStyle: {shadowColor: "#97b552"}}
+			]
+		}
+	]
+}
+
+var chartGraph = echarts.init(document.getElementById("container1"), 'macarons');
+
+var dataset;
+var Table;
+
+var setOptionData = function()
+{
+	var div = document.getElementById("sys_status");
+	if (dataset.sys_status)
+		div.innerHTML = '<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:#FFA500;"></span> Active'
+	else
+		div.innerHTML = '<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:#CCCCCC;"></span> Offline'
+
+
+	var div = document.getElementById("start_time");
+	div.innerHTML = dataset.start_time;
+	var div = document.getElementById("data_time");
+	div.innerHTML = dataset.data_time;
+
+
+	var optionTemp;
+	optionTemp = JSON.parse(JSON.stringify(optionGraph));
+	// optionTemp.series[0].data = dataset.clientgraph;
+	chartGraph.clear();
+	chartGraph.setOption(optionTemp);
+
+
+	document.getElementById('tablebox').style.opacity = 0;
+	if (Table)
+	{
+		Table.destroy();
+		Table.clear();
+		Table = null;
+		document.getElementById("client_table").remove();
+	}
+	var div = document.getElementById("tablebox");
+	div.innerHTML = "<table id='client_table' class='display table table-bordered'> <thead><tr><th>ID</th><th>IP地址</th><th>接收流量</th><th>接收流数</th></tr></thead> <tbody>" + dataset.tb_client.join("") + "</tbody> </table>";
+	Table = $('#client_table').DataTable(optionTable);
+	document.getElementById('tablebox').style.opacity = 1;
+}
+
+var optionTable = {
+	bLengthChange: false,
+	paging: false,
+	iDisplayLength: 100,
+	scrollY: '56vh',
+	searching: false,
+	autoWidth: true,
+	info: false
+};
+
+var draw = function(data)
+{
+	console.log(pageid)
+	dataset = data;
+	console.log(dataset);
+	setOptionData();
+};
+
+window.onresize = function ()
+{
+	sidebarChart.resize();
+	if (chartGraph)
+		chartGraph.resize();
+};
+
 </script>
 {% endblock %}

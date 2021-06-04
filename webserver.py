@@ -1,14 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for, Blueprint
-import sqlalchemy
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, scoped_session
-
 import json
 import numpy as np
 
-from package.dbconsole.data import data
-from package.webelements import table
-from package.webelements import chart
+from package.webelements import pgdata_local
+from package.webelements.pgsysinfo import pgsysinfo
+from package.webelements.pgtraffic import pgtraffic
+from package.webelements.pgdistri import pgdistri
+from package.webelements.pgelephant import pgelephant
+from package.webelements.pgflows import pgflows
+from package.webelements.chsidebar import chsidebar
+from package.webelements.chflowhis import chflowhis
 
 class CustomEncoder(json.JSONEncoder):
 	def default(self, obj):
@@ -21,87 +22,67 @@ class CustomEncoder(json.JSONEncoder):
 		else:
 			return super(CustomEncoder, self).default(obj)
 
-dbengine = sqlalchemy.create_engine('mysql+pymysql://root:9999@localhost:3306/sketchestest')#, echo=True)
-DBSession = scoped_session(sessionmaker(bind=dbengine))
-Data = data(DBSession)
+pgdata = pgdata_local.PGData('mysql+pymysql://root:9999@localhost:3306/test2')
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
-	return redirect('/show/1')
-
-@app.route('/show/<id>')
-def show(id):
-	return '404 Not Found.' + id
+	dataid = request.args.get('id')
+	chart = chsidebar(pgdata, dataid)
+	return render_template('index.html', pageid=0, sidedata=chart)
 
 @app.route('/show/1')
 def show1():
-	attrid = request.args.get('id')
-	if not attrid or int(attrid) not in Data.attrid():
-		attrid = sorted(Data.attrid().keys())[-1]
-	else:
-		attrid = int(attrid)
-	chart2 = chart.sidebarchart(Data, attrid)
-	return render_template('show1.html', pageid=1, dataid=attrid, chart2=chart2)
+	dataid = request.args.get('id')
+	chart = chsidebar(pgdata, dataid)
+	return render_template('show1.html', pageid=1, sidedata=chart)
 
 @app.route('/show/2')
 def show2():
-	attrid = request.args.get('id')
-	if not attrid or int(attrid) not in Data.attrid():
-		attrid = sorted(Data.attrid().keys())[-1]
-	else:
-		attrid = int(attrid)
-	chart2 = chart.sidebarchart(Data, attrid)
-	return render_template('show2.html', pageid=2, dataid=attrid, chart2=chart2)
+	dataid = request.args.get('id')
+	chart = chsidebar(pgdata, dataid)
+	return render_template('show2.html', pageid=2, sidedata=chart)
 
 @app.route('/show/3')
 def show3():
-	attrid = request.args.get('id')
-	if not attrid or int(attrid) not in Data.attrid():
-		attrid = sorted(Data.attrid().keys())[-1]
-	else:
-		attrid = int(attrid)
-	chart2 = chart.sidebarchart(Data, attrid)
-	return render_template('show3.html', pageid=3, dataid=attrid, chart2=chart2)
+	dataid = request.args.get('id')
+	chart = chsidebar(pgdata, dataid)
+	return render_template('show3.html', pageid=3, sidedata=chart)
 
 @app.route('/show/4')
 def show4():
-	attrid = request.args.get('id')
-	if not attrid or int(attrid) not in Data.attrid():
-		attrid = sorted(Data.attrid().keys())[-1]
-	else:
-		attrid = int(attrid)
-	table1 = table.flowtable(Data, attrid)
-	chart2 = chart.sidebarchart(Data, attrid)
-	return render_template('show4.html', pageid=4, dataid=attrid, table1=table1, chart2=chart2)
+	dataid = request.args.get('id')
+	chart = chsidebar(pgdata, dataid)
+	return render_template('show4.html', pageid=4, sidedata=chart)
+
+@app.route('/getflowhistory', methods=['GET', 'POST'])
+def getflowhistory():
+	flowid = int(request.args.get('flowid'))
+	result = chflowhis(pgdata, flowid)
+	return json.dumps(result, cls=CustomEncoder)
+
 
 @app.route('/getdata', methods=['GET', 'POST'])
 def getdata():
 	pageid = int(request.args.get('pageid'))
-	dataid = request.args.get('id')
-	if not dataid or int(dataid) not in Data.attrid():
-		dataid = sorted(Data.attrid().keys())[-1]
-	else:
-		dataid = int(dataid)
-	data = {}
+	dataid = request.args.get('dataid')
+	result = []
+	if pageid == 0:
+		result = pgsysinfo(pgdata, dataid)
 	if pageid == 1:
-		data = chart.trafficchart(Data, dataid)
-	elif pageid == 2:
-		data = chart.distrchart(Data, dataid)
-	elif pageid == 3:
-		data = chart.elephantchart(Data, dataid)
-	elif pageid == 4:
-		data = table.flowtable(Data, dataid)
-	elif pageid == 5:
-		data = chart.sidebarchart(Data, dataid)
-	# data['dataid'] = dataid
-	return json.dumps(data, cls=CustomEncoder)
-
+		result = pgtraffic(pgdata, dataid)
+	if pageid == 2:
+		result = pgdistri(pgdata, dataid)
+	if pageid == 3:
+		result = pgelephant(pgdata, dataid)
+	if pageid == 4:
+		result = pgflows(pgdata, dataid)
+	return json.dumps(result, cls=CustomEncoder)
 
 @app.route('/reflesh', methods=['GET', 'POST'])
 def reflesh():
-	Data.reflesh()
+	pgdata.reflesh()
 	url = request.args.get('url')
 	return redirect(url)
 

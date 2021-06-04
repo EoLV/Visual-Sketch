@@ -1,30 +1,13 @@
 import json
 import traceback
 import time
+
 from flask import Flask, render_template, request, redirect, url_for, Blueprint
-import sqlalchemy
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, scoped_session
 
-from package.dbconsole import models, sessions
+from package.dbconsole import dbdata
 
-dbengine = sqlalchemy.create_engine('mysql+pymysql://root:9999@localhost:3306/sketchestest') #, echo=True)
-DBSession = scoped_session(sessionmaker(bind=dbengine))
-Base = declarative_base()
-Attribute = models.make_attribute(Base)
-
+db = dbdata.DBData('mysql+pymysql://root:9999@localhost:3306/test2')
 app = Flask(__name__)
-
-def save_elastic(data):
-	try:
-		Heavypart = models.make_heavypart(Base, data['ID'])
-		Distribution = models.make_distribution(Base, data['ID'])
-		Base.metadata.create_all(bind=dbengine)
-	except:
-		traceback.print_exc()
-		return 'create failed'
-	ret = sessions.save_elastic_session(DBSession(), data, Attribute, Heavypart, Distribution)
-	return ret
 
 @app.route('/post', methods=['GET', 'POST'])
 def post():
@@ -33,27 +16,25 @@ def post():
 	print('posting!')
 	print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
 	rawdata = request.get_data(as_text=True)
-	f = open(str(time.time()).replace('.', '_'), 'x')
-	f.write(rawdata)
+	# f = open('/cache/' + str(time.time()).replace('.', '_'), 'x')
+	# f.write(rawdata)
+	db.set_sys_info(1, request.environ['REMOTE_ADDR'], request.environ['REMOTE_PORT'], request.environ['HTTP_USER_AGENT'])
+
 	try:
-		data = json.loads(rawdata)
+		rawdata = json.loads(rawdata)
 	except:
 		traceback.print_exc()
 		return 'json syntax error'
-	# f = open(data['Time'].replace(':', '_'), 'x')
-	# f.write(rawdata)
 
-	if data['Algorithm'] == 'elastic':
-		return save_elastic(data);
-	return 'unknown algorithm'
+	# print(rawdata)
+
+	db.save_data(rawdata)
+	print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+	return 'data saved'
 
 @app.route('/clean')
 def clean():
-	global Base
-	global Attribute
-	Base.metadata.drop_all(bind=dbengine)
-	Base = declarative_base()
-	Attribute = models.make_attribute(Base)
+	db.clean()
 	return 'clean finished'
 
 if __name__ == '__main__':

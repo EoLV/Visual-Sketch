@@ -3,40 +3,55 @@
 {% block title %}网络可视化展示平台{% endblock %}
 
 {% block main %}
-<div class="block" id="block1">
+<div class="titleblock" style="position:absolute;left:8%;right:8%;top:5%;bottom:85%;">
 	<h2>大象流</h2>
-	<div id="container1" style="position:absolute;left:5%;width:90%;top:10%;height:90%"></div>
-	<div style="color:#999;position:absolute;bottom:5%;right:10%">Designed by Zining Dong. Data Source: Qifan Ren.</div>
 </div>
 
+<div class="block" id="block1" style="position:absolute;left:8%;right:8%;top:18%;bottom:46%">
+	<div id="container1" style="position:absolute;left:5%;width:90%;top:5%;height:90%"></div>
+</div>
+
+<div class="block" id="block2" style="position:absolute;left:8%;right:41%;top:56%;bottom:8%">
+	<div id="container2" style="position:absolute;left:5%;width:90%;top:5%;height:90%"></div>
+</div>
+
+<div class="block" id="block3" style="position:absolute;left:61%;right:8%;top:56%;bottom:8%">
+	<div id="container3" style="position:absolute;left:5%;width:90%;top:5%;height:90%"></div>
+</div>
+
+<div style="color:#999;position:absolute;bottom:3%;right:8%">2021 Designed by Zining Dong.</div>
+
 <script>
-var dom = document.getElementById("container1");
-var mainChart = echarts.init(dom, 'macarons');
-
-var chart1;
-
-var option;
 
 var formatter1 = function (params)
 {
 	var str = params.marker + ' ' + params.name + '<br>';
-	str += '　 <strong>ID: ' + params.data.ID + '　 Length: ' + params.value[1] + '</strong>';
+	str += '　 <strong>ID: ' + params.data.ID + '　 Size: ' + params.value[1] + '</strong>';
 	return str;
 }
 
-option = {
-	toolbox: {
-		feature: {
-			dataView: {},
-			saveAsImage: {}
-		}
-	},
+var formatter2 = function (params)
+{
+	var str = '';
+	try
+	{
+		str += params[0].marker + ' <strong>Data ' + params[0].data[0] + ': ';
+		str += params[0].data[1] + '</strong><br>';
+		str += '　 <strong>' + params[0].data[2] + '</strong>';		
+	}
+	catch (err)
+	{
+		console.log(err);
+	}
+	return str;
+}
+
+var optionBar1 = {
 	tooltip: {
 		trigger: 'item'
 	},
 	grid: [
-		{left: '3%', right: '3%', top: '7%', bottom: '60%', containLabel: true},
-		{left: '3%', right: '3%', top: '52%', bottom: '15%', containLabel: true}
+		{left: '0%', right: '3%', top: '7%', bottom: '7%', containLabel: true}
 	],
 	dataZoom: [
 		{
@@ -46,35 +61,26 @@ option = {
 			bottom: '15%',
 			startValue: 0,
 			endValue: 49
-		},
-		{
-			type: 'inside',
-			xAxisIndex: 1,
-			fiterMode: 'filter',
-			bottom: '15%',
-			startValue: 0,
-			endValue: 49
 		}
 	],
 	xAxis: [
 		{
 			type: 'category',
+			axisLine: {
+				show: false,
+			},
 			gridIndex: 0
-		},
-		{
-			type: 'category',
-			gridIndex: 1
-		},
+		}
 	],
 	yAxis: [
 		{
 			type: 'value',
+			axisLine: {
+				lineStyle: {
+					color: '#000'
+				}
+			},
 			gridIndex: 0,
-			scale: true
-		},
-		{
-			type: 'value',
-			gridIndex: 1,
 			scale: true
 		}
 	],
@@ -89,68 +95,232 @@ option = {
 				barBorderRadius: [5, 5, 0, 0],
 				shadowBlur: 5
 			},
-		},
+		}
+	],
+	graphic: [
+		{
+			type: 'text',
+			top: '11%',
+			right: '5%',
+			z: 100,
+			style:{
+				text: 'Elephant Flows',
+				fill: 'rgba(0, 0, 0, 0.9)',
+				fontSize: 18,
+				fontWeight: 'bold',
+			}
+		}
+	]
+};
+
+var optionBar2 = {
+	tooltip: {
+		trigger: 'item'
+	},
+	grid: [
+		{left: '0%', right: '3%', top: '7%', bottom: '7%', containLabel: true}
+	],
+	dataZoom: [
+		{
+			type: 'inside',
+			xAxisIndex: 0,
+			fiterMode: 'filter',
+			bottom: '15%',
+			startValue: 0,
+			endValue: 29
+		}
+	],
+	xAxis: [
+		{
+			type: 'category',
+			axisLine: {
+				show: false,
+			},
+			gridIndex: 0
+		}
+	],
+	yAxis: [
+		{
+			type: 'value',
+			axisLine: {
+				lineStyle: {
+					color: '#000'
+				}
+			},
+			gridIndex: 0,
+			scale: true
+		}
+	],
+	series: [
 		{
 			name: 'Increasing',
 			type: 'bar',
-			xAxisIndex: 1,
-			yAxisIndex: 1,
+			xAxisIndex: 0,
+			yAxisIndex: 0,
 			tooltip: {},
 			itemStyle: {
 				barBorderRadius: [5, 5, 0, 0],
 				shadowBlur: 5
 			},
-		},
+		}
+	],
+	graphic: [
 		{
-			id: 'pie1',
-			type: 'pie',
-			center: ['50%', '43%'],
-			radius: ['0%'],
-			tooltip: { show: false },
-			color: 'rgba(0, 0, 0, 0)',
-			label: {
-				position: 'center',
-				fontSize: 20,
-				textBorderColor: 'rgba(255,255,255,0.6)',
-				textBorderWidth: 4,
-			},
-			data: [ { 'name': 'Elephant Flows', 'value': 1 } ]
-		},
-		{
-			id: 'pie2',
-			type: 'pie',
-			center: ['50%', '88%'],
-			radius: ['0%'],
-			tooltip: { show: false },
-			color: 'rgba(0, 0, 0, 0)',
-			label: {
-				position: 'center',
-				fontSize: 20,
-				textBorderColor: 'rgba(255,255,255,0.6)',
-				textBorderWidth: 4,
-			},
-			data: [ { 'name': 'Increasing Elephant Flows', 'value': 1 } ]
+			type: 'text',
+			top: '11%',
+			right: '5%',
+			z: 100,
+			style:{
+				text: 'Elephant Flows (Increasing)',
+				fill: 'rgba(0, 0, 0, 0.9)',
+				fontSize: 18,
+				fontWeight: 'bold',
+			}
 		}
 	]
 };
 
-var setOptionData = function(option, chart1)
+var optionLine = {
+	tooltip: {
+		trigger: 'axis'
+	},
+	grid: [
+		{left: '0%', right: '3%', top: '20%', bottom: '7%', containLabel: true}
+	],
+	dataZoom: [
+		{
+			type: 'inside',
+			xAxisIndex: 0,
+			fiterMode: 'filter',
+			bottom: '15%',
+		}
+	],
+	xAxis: [
+		{
+			type: 'category',
+			axisLine: {
+				lineStyle: {
+					color: '#000'
+				}
+			},
+			gridIndex: 0
+		}
+	],
+	yAxis: [
+		{
+			type: 'value',
+			axisLine: {
+				lineStyle: {
+					color: '#000'
+				}
+			},
+			gridIndex: 0,
+			scale: true
+		}
+	],
+	series: [
+		{
+			name: 'Increasing',
+			type: 'line',
+			xAxisIndex: 0,
+			yAxisIndex: 0,
+			lineStyle: {
+				width: 2
+			},
+			itemStyle: {
+				barBorderRadius: [5, 5, 0, 0],
+				shadowBlur: 5
+			},
+		}
+	],
+	graphic: [
+		{
+			type: 'text',
+			top: '11%',
+			right: '5%',
+			z: 100,
+			style:{
+				text: 'Flow History',
+				fill: 'rgba(0, 0, 0, 0.9)',
+				fontSize: 18,
+				fontWeight: 'bold',
+			}
+		}
+	]
+};
+
+var chartBar1 = echarts.init(document.getElementById("container1"), 'macarons');
+var chartBar2 = echarts.init(document.getElementById("container2"), 'macarons');
+var chartLine = echarts.init(document.getElementById("container3"), 'macarons');
+
+var dataset;
+
+var getFlowHistory = function(flowid, color)
 {
-	var newoption = JSON.parse(JSON.stringify(option));
-	newoption.series[0].tooltip.formatter = formatter1;
-	newoption.series[1].tooltip.formatter = formatter1;
-	newoption.series[0].data = chart1.elephantdata;
-	newoption.series[1].data = chart1.swaptdata;
-	return newoption;
+	// console.log(flowid)
+	var url = "/getflowhistory?dataid=" + dataid + "&flowid=" + flowid;
+	var request = new XMLHttpRequest();
+	request.open("GET", url);
+	request.send(null);
+	request.onload = function() {
+		if(request.status == 200) {
+			var dataTemp = JSON.parse(request.responseText);
+			var optionTemp = JSON.parse(JSON.stringify(optionLine));
+			optionTemp.series[0].lineStyle.color = color;
+			optionTemp.series[0].itemStyle.color = color;
+			optionTemp.tooltip.formatter = formatter2;
+			console.log(flowid, dataTemp.ch_flowhis)
+			optionTemp.series[0].data = dataTemp.ch_flowhis;
+			optionTemp.graphic[0].style.text = "Flow History (ID: " + flowid + ")";
+			chartLine.clear();
+			chartLine.setOption(optionTemp);
+		}
+	}
 }
+
+var setOptionData = function()
+{
+	var optionTemp;
+	optionTemp = JSON.parse(JSON.stringify(optionBar1));
+	optionTemp.series[0].tooltip.formatter = formatter1;
+	optionTemp.series[0].data = dataset.ch_allflow;
+	chartBar1.clear();
+	chartBar1.setOption(optionTemp);
+
+	optionTemp = JSON.parse(JSON.stringify(optionBar2));
+	optionTemp.series[0].tooltip.formatter = formatter1;
+	optionTemp.series[0].data = dataset.ch_active;
+	chartBar2.clear();
+	chartBar2.setOption(optionTemp);
+
+	getFlowHistory(dataset.ch_allflow[0].ID, dataset.ch_allflow[0].itemStyle.color);
+}
+
+chartBar1.on('click', 'series', function(obj) {
+	getFlowHistory(obj.data.ID, obj.data.itemStyle.color);
+});
+
+chartBar2.on('click', 'series', function(obj) {
+	getFlowHistory(obj.data.ID, obj.data.itemStyle.color);
+});
 
 var draw = function(data)
 {
-	chart1 = data;
-	mainChart.clear();
-	var visoption = setOptionData(option, chart1);
-	mainChart.setOption(visoption);
-}
+	dataset = data;
+	console.log(dataset);
+	setOptionData();
+};
+
+window.onresize = function ()
+{
+	sidebarChart.resize();
+	if (chartBar1)
+		chartBar1.resize();
+	if (chartBar2)
+		chartBar2.resize();
+	if (chartLine)
+		chartLine.resize();
+};
 
 </script>
 {% endblock %}

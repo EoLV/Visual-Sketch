@@ -74,7 +74,11 @@ body
 
 #main
 {
-	padding-left: 20%;
+	position: fixed;
+	left: 20%;
+	width: 80%;
+	top: 0%;
+	bottom: 0%;
 }
 	#main #cover
 	{
@@ -92,16 +96,20 @@ body
 		line-height: 4ex;
 		color: rgba(255, 255, 255, 0.9);
 	}
+	#main .titleblock
+	{
+		background-color: rgba(0, 0, 0, 0.05);
+		padding: 5px 30px 20px 30px;
+		border-radius: 20px;
+		box-shadow: 1px 1px 10px 0 #ccc;
+	}
 	#main .block
 	{
 		background-color: rgba(0, 0, 0, 0.05);
-		position: relative;
-		width: 80%;
-		top: 6%;
-		height: 900px;
-		margin: 30px auto;
 		padding: 5px 30px 20px 30px;
-		border-radius: 15px;
+		border-radius: 20px;
+		z-index: -100;
+		box-shadow: 1px 1px 10px 0 #ccc;
 	}
 	#main .block p img
 	{
@@ -140,6 +148,17 @@ body
 	{
 		margin-left: 20px;
 		margin-right: 50px;
+	}
+	#main h2
+	{
+		font-size:30px;
+	}
+	#main h3
+	{
+		display:block;
+		margin:5px 0;
+		font-weight: bold;
+		font-size: 20;
 	}
 
 .comment

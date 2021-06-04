@@ -7,7 +7,7 @@
 	<link href="{{ url_for('static', filename='theme/style.css') }}" type="text/css" rel="stylesheet">
 	<link href="{{ url_for('static', filename='theme/table.css') }}" type="text/css" rel="stylesheet">
 	<!-- jquery -->
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<script src="/static/js/jquery-3.6.0.js"></script>
 	<!-- DataTables -->
 	<link rel="stylesheet" type="text/css" href="http://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
 	<script type="text/javascript" charset="utf8" src="http://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
@@ -21,14 +21,15 @@
 		<h1 style="font-size: 30px; letter-spacing: 0.1ex;" id="callblock0">网络可视化展示平台</h1>
 		<div class="buttons">
 			<ul>
-				<li><a id="callblock1" href="#" onclick="redirect_page(1)" > 总流量 </a></li>
+				<li><a id="callblock0" href="#" onclick="redirect_page(0)" > 系统信息 </a></li>
+				<li><a id="callblock1" href="#" onclick="redirect_page(1)" > 流量信息 </a></li>
 				<li><a id="callblock2" href="#" onclick="redirect_page(2)" > 流分布 </a></li>
 				<li><a id="callblock3" href="#" onclick="redirect_page(3)" > 大象流 </a></li>
 				<li><a id="callblock4" href="#" onclick="redirect_page(4)" > 流列表 </a></li>
 				<li><a id="reflesh" href="#" onclick="redirect_reflesh()"> 清空缓存 </a></li>
 			</ul>
 		</div>
-		<div id="container2" style="position:absolute;left:10%;width:80%;bottom:100px;height:90px"></div>
+		<div id="container_side" style="position:absolute;left:10%;width:80%;bottom:100px;height:90px"></div>
 	</div>
 	<div id="main">
 		{% block main %}
@@ -39,28 +40,31 @@
 </body>
 <script>
 
-var dataid = {{ dataid if dataid else 1 | safe }};
-var pageid = {{ pageid if pageid else 1 | safe }};
+var dataid = {{ sidedata.dataid | safe }};
+var pageid = {{ pageid | safe }};
 
-var chart2;
+var sidedata;
 
 function redirect_page(pageid)
 {
-	if (dataid)
-		window.location.href = '/show/' + pageid + '?id=' + dataid;
+	var url;
+	if (pageid)
+		url = '/show/' + pageid;
 	else
-		window.location.href = '/show/' + pageid;
+		url = '/'
+	if (dataid)
+		window.location.href = url + '?id=' + dataid;
+	else
+		window.location.href = url;
 }
 
 function redirect_reflesh(){
 	window.location.href = '/reflesh?url=' + window.location.pathname;
 }
 
-var dom = document.getElementById("container2");
-var sidebarChart = echarts.init(dom, 'macarons');
+var sidebarChart = echarts.init(document.getElementById("container_side"), 'macarons');
 
-var chart2 = {{ chart2 | safe }};
-var sidebaroption;
+var sidedata = {{ sidedata | safe }};
 
 var sidebarformatter = function (params)
 {
@@ -72,7 +76,7 @@ var sidebarformatter = function (params)
 	return str;
 }
 
-sidebaroption = {
+var sidebaroption = {
 	tooltip: {
 		trigger: 'item'
 	},
@@ -152,79 +156,70 @@ sidebaroption = {
 var getServerData = function(pageid, dataid)
 {
 	var url = "/getdata?pageid=" + pageid + "&dataid=" + dataid;
-    var request = new XMLHttpRequest();
-    request.open("GET", url);
-    request.send(null);
-    request.onload = function() {
-        if(request.status == 200) {
-            var chart1 = JSON.parse(request.responseText);
-            draw(chart1);
-        }
-    }
-}
-
-var setRedBar = function(dataid)
-{
-	console.log("setRedBar", dataid, chart2.sidebardata)
-	for (let i = 0; i < chart2.sidebardata.length; ++i)
-	{
-		console.log(chart2.sidebardata[i])
-		if (chart2.sidebardata[i].itemStyle.color === "#dd6b66")
-		{
-			chart2.sidebardata[i].itemStyle.color = "#759aa0";
-			chart2.sidebardata[i].itemStyle.borderWidth = 0;
-		}
-		if (chart2.sidebardata[i].name === dataid)
-		{
-			chart2.sidebardata[i].itemStyle = {
-				color: "#dd6b66",
-				borderColor: "#eeb5b2",
-				borderWidth: 2
-			};
-			chart2.text = [ { 'name': chart2.sidebardata[i].time + ' (Data' + dataid + ')', 'value': 1 } ];
-			chart2.minvalue = Math.max(i - 4, 0);
+	var request = new XMLHttpRequest();
+	request.open("GET", url);
+	request.send(null);
+	request.onload = function() {
+		if(request.status == 200) {
+			var chart1 = JSON.parse(request.responseText);
+			draw(chart1);
 		}
 	}
 }
 
-var setSidebarData = function(option, chart2)
+var setRedBar = function(dataid)
+{
+	for (let i = 0; i < sidedata.ch_sidebar.length; ++i)
+	{
+		if (sidedata.ch_sidebar[i].itemStyle.color === "#dd6b66")
+		{
+			sidedata.ch_sidebar[i].itemStyle.color = "#759aa0";
+			sidedata.ch_sidebar[i].itemStyle.borderWidth = 0;
+		}
+		if (sidedata.ch_sidebar[i].name === dataid)
+		{
+			sidedata.ch_sidebar[i].itemStyle = {
+				color: "#dd6b66",
+				borderColor: "#eeb5b2",
+				borderWidth: 2
+			};
+			sidedata.text = [ { 'name': sidedata.ch_sidebar[i].time + ' (Data ' + dataid + ')', 'value': 1 } ];
+			sidedata.minvalue = Math.max(i - 4, 0);
+		}
+	}
+}
+
+var setSidebarData = function(option, sidedata)
 {
 	var newoption = JSON.parse(JSON.stringify(option));
-	newoption.dataZoom[0].startValue = chart2.minvalue;
-	newoption.dataZoom[0].endValue = chart2.minvalue + 8;
+	newoption.dataZoom[0].startValue = sidedata.minvalue;
+	newoption.dataZoom[0].endValue = sidedata.minvalue + 8;
 	newoption.series[0].tooltip.formatter = sidebarformatter;
-	newoption.series[0].data = chart2.sidebardata;
-	newoption.series[1].data = chart2.text;
-	newoption.series[1].data = chart2.text;
+	newoption.series[0].data = sidedata.ch_sidebar;
+	newoption.series[1].data = sidedata.text;
+	newoption.series[1].data = sidedata.text;
 	return newoption;
 }
 
 sidebarChart.on('click', 'series', function(obj) {
 	dataid = obj.data.value[0];
 	setRedBar(dataid);
-	var visoption = setSidebarData(sidebaroption, chart2);
+	var visoption = setSidebarData(sidebaroption, sidedata);
 	sidebarChart.setOption(visoption);
 	getServerData(pageid, dataid);
 })
 
 var drawsidebar = function(data)
 {
-	getServerData(pageid, dataid);
-	chart2 = data;
+	sidedata = data;
 	sidebarChart.clear();
 	setRedBar(dataid);
-	var visoption = setSidebarData(sidebaroption, chart2);
+	var visoption = setSidebarData(sidebaroption, sidedata);
 	sidebarChart.setOption(visoption);
+	getServerData(pageid, dataid);
 }
 
-window.onresize = function ()
-{
-    sidebarChart.resize();
-    if (mainChart)
-	    mainChart.resize();
-};
-
-drawsidebar({{ chart2 | safe }})
+drawsidebar({{ sidedata | safe }})
 
 </script>
 </html>

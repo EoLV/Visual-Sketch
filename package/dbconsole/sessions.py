@@ -1,80 +1,87 @@
 import sqlalchemy
 from sqlalchemy import text
 import traceback
-import time
-import json
-import sys
-from functools import reduce
 
-convert_endian = lambda x: reduce(lambda a, b: a + b, [x//(256**i)%256*(256**(3-i)) for i in range(3,-1,-1)][::-1])
-
-def save_elastic_session(session, data, Attribute, Heavypart, Distribution):
+def dbinsert(session, model, item):
 	try:
-		row = Attribute(ID=data['ID'],
-			Algorithm=data['Algorithm'],
-			Time=data['Time'],
-			Cardinality=data['Cardinality'],
-			Entropy=str(data['Entropy']))
-		session.add(row)
-		# for r in data['HeavyPart']:
-		# 	row = Heavypart(SrcIP=r[0],
-		# 		SrcPort=r[1],
-		# 		DstIP=r[2],
-		# 		DstPort=r[3],
-		# 		Protocol=r[4],
-		# 		PktNum=r[5],
-		# 		SwapFlag=r[6])
-		# 	session.add(row)
-		# d3 = []
-		# for i in range(len(data['Distribution'])):
-		# 	for l, n in data['Distribution'][i].items():
-		# 		d3.append(Distribution(Client=i+1, Length=l, Num=n))
-		# session.add_all(d3)
-		s = 'INSERT INTO %s (SrcIP, SrcPort, DstIP, DstPort, Protocol, PktNum, SwapFlag) VALUES ' %Heavypart.__tablename__
-		cmd = [s]
-		cnt = 0
-		for r in data['HeavyPart']:
-			cnt += 1
-			if cnt > 1:
-				cmd.append(',')
-			cmd.append('(' + str(convert_endian(r[0])) + ',' + str(r[2]) + ',' + str(convert_endian(r[1])) + ',' + str(r[3]) + ',\''
-				+ str(r[4]) + '\',' + str(r[5]) + ',' + str(r[6]) + ')')
-		if cnt > 0:
-			session.execute(text(''.join(cmd)))
-
-		for i in range(len(data['Distribution'])):
-			s = 'INSERT INTO %s (Client, Length, Num) VALUES ' %Distribution.__tablename__
-			cmd = [s]
-			cnt = 0
-			for t in data['Distribution'][i]:
-				l = t[0]
-				n = t[1]
-				cnt += 1
-				if cnt > 1:
-					cmd.append(',')
-				cmd.append('(' + str(i + 1) + ',' + str(l) + ',' + str(n) + ')')
-				if cnt > 10000:
-					session.execute(text(''.join(cmd)))
-					cmd = [s]
-					cnt = 0
-			if cnt > 0:
-				session.execute(text(''.join(cmd)))
+		if model.__tablename__ == 'sys_info':
+			row = model(status = item[0], start_time = item[1], source_addr = item[2],
+				source_port = item[3], source_agent = item[4])
+			result = session.add(row)
+		if model.__tablename__ == 'data_info':
+			row = model(tid = item[0], time = item[1], data_type = item[2],
+				flow_count = item[3], traffic_count = item[4], entropy = item[5], deleted = item[6])
+			result = session.add(row)
+		if model.__tablename__ == 'clients':
+			row = model(cid = item[0], addr = item[1])
+			result = session.add(row)
+		if model.__tablename__ == 'flows':
+			row = model(fid = item[0], src = item[1], dst = item[2],
+				src_port = item[3], dst_port = item[4], protocol = item[5])
+			result = session.add(row)
 		session.commit()
-		session.close()
-		print('post fin!')
-		print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-		return 'upload completed\n'
 	except:
 		traceback.print_exc()
-		session.rollback()
-		session.close()
-		exc_type, exc_value, exc_traceback = sys.exc_info()
-		return 'upload failed, rollback\n' + str(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
+		return 'insert error'
+	return 'accepted'
 
-def dbselect(session, table, field = '*', order = '', desc = False, limit = '', where = ''):
+def dbinsert_all(session, model, items):
+	try:
+		s = ''
+		if model.__tablename__ == 'distribution':
+			s = 'INSERT INTO distribution (tid, cid, size, count) VALUES '
+		if model.__tablename__ == 'client_statistics':
+			s = 'INSERT INTO client_statistics (tid, cid, flow_count, traffic_count, entropy) VALUES '
+		if model.__tablename__ == 'elephant_flows':
+			s = 'INSERT INTO elephant_flows (tid, fid, size, increment) VALUES '
+		if model.__tablename__ == 'clients':
+			s = 'INSERT INTO clients (cid, addr) VALUES '
+		if model.__tablename__ == 'flows':
+			s = 'INSERT INTO flows (fid, src, dst, src_port, dst_port, protocol) VALUES '
+
+		cmd = [s]
+		item_cnt = 0
+		for item in items:
+			item_cnt += 1
+			if item_cnt > 1:
+				cmd.append(',')
+			cmd.append('(' + ','.join(list(map(lambda x: '"' + str(x) + '"', item))) + ')')
+			# 若SQL语句过长会产生错误
+			if item_cnt > 10000:
+				session.execute(text(''.join(cmd)))
+				cmd = [s]
+				item_cnt = 0
+		if item_cnt > 0:
+			session.execute(text(''.join(cmd)))
+		session.commit()
+	except:
+		# traceback.print_exc()
+		return 'insert error'
+	return 'accepted'
+
+def dbdelete(session, model, order = '', desc = False, limit = '', where = ''):
 	res = []
 	try:
-		cmd = 'SELECT %s FROM %s' %(field, table)
+		cmd = 'DELETE FROM %s' %model.__tablename__
+		if order:
+			cmd += ' ORDER BY ' + str(order)
+		if desc:
+			cmd += ' DESC '
+		if limit:
+			cmd += ' LIMIT ' + str(limit)
+		if where:
+			cmd += ' WHERE ' + str(where)
+		session.execute(text(cmd))
+		session.commit()
+	except:
+		# traceback.print_exc()
+		return 'delete error'
+	return 'accepted'
+
+def dbselect(session, model, field = '*', order = '', desc = False, limit = '', where = ''):
+	res = []
+	try:
+		cmd = 'SELECT %s FROM %s' %(field, model.__tablename__)
 		if order:
 			cmd += ' ORDER BY ' + str(order)
 		if desc:
@@ -88,14 +95,16 @@ def dbselect(session, table, field = '*', order = '', desc = False, limit = '', 
 			res.append(list(row))
 	except:
 		traceback.print_exc()
+		pass
 	return res
 
 def dbcommand(session, command):
 	res = []
 	try:
 		t = session.execute(text(command))
+		session.commit()
 		for row in t:
 			res.append(list(row))
 	except:
-		traceback.print_exc()
+		pass
 	return res

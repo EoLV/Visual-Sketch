@@ -3,25 +3,48 @@
 {% block title %}网络可视化展示平台{% endblock %}
 
 {% block main %}
-<div class="block" id="block1">
+<div class="titleblock" style="position:absolute;left:8%;right:8%;top:5%;bottom:85%;">
 	<h2>流分布</h2>
-	<div id="container1" style="position:absolute;left:5%;width:90%;top:10%;height:90%"></div>
-	<div style="color:#999;position:absolute;bottom:5%;right:10%">Designed by Zining Dong. Data Source: Qifan Ren.</div>
 </div>
 
-<script>
-var dom = document.getElementById('container1');
-var mainChart = echarts.init(dom, 'macarons');
-var app = {};
+<div style="position:absolute;left:8%;right:30%;top:18%;bottom:8%">
+	<div id="container1" style="position:absolute;left:0%;width:100%;top:0%;height:100%"></div>
+	<div class="block" id="block1" style="position:absolute;left:0%;right:87%;top:0%;bottom:60%">
+	</div>
 
-var chart1;
+	<div class="block" id="block2" style="position:absolute;left:15%;right:0%;top:0%;bottom:60%">
+	</div>
+
+	<div class="block" id="block3" style="position:absolute;left:0%;right:0%;top:43%;bottom:0%">
+	</div>
+</div>
+
+<div class="block" id="block4" style="position:absolute;left:72%;right:8%;top:18%;bottom:74%;border:3px solid rgba(0,0,0,0.15)">
+	<div style="font-size:26px;font-weight:bold;text-align:center;padding:15px 0;color:#000;text-shadow:4px 4px 4px rgba(0,0,0,0.4)">Flow / Traffic</div>
+	<div id="container4" style="position:absolute;left:0%;width:100%;top:0%;height:100%"></div>
+</div>
+
+<div class="block" id="block5" style="position:absolute;left:72%;right:8%;top:28%;bottom:41%">
+	<div id="container5" style="position:absolute;left:5%;width:90%;top:5%;height:90%"></div>
+</div>
+
+<div class="block" id="block6" style="position:absolute;left:72%;right:8%;top:61%;bottom:8%">
+	<div id="container6" style="position:absolute;left:5%;width:90%;top:5%;height:90%"></div>
+</div>
+
+<div style="color:#999;position:absolute;bottom:3%;right:8%">2021 Designed by Zining Dong.</div>
+
+<script>
 
 var yAxis1 = [
 	{
 		type: 'log',
 		min: 0.6,
 		axisLine: {
-			onZero: false
+			onZero: false,
+			lineStyle: {
+				color: '#000'
+			}
 		},
 		axisLabel: {
 			showMinLabel: false
@@ -32,7 +55,10 @@ var yAxis1 = [
 		type: 'log',
 		min: 0.6,
 		axisLine: {
-			onZero: false
+			onZero: false,
+			lineStyle: {
+				color: '#000'
+			}
 		},
 		axisLabel: {
 			showMinLabel: false
@@ -45,7 +71,10 @@ var yAxis2 = [
 	{
 		type: 'value',
 		axisLine: {
-			onZero: false
+			onZero: false,
+			lineStyle: {
+				color: '#000'
+			}
 		},
 		axisLabel: {
 			showMinLabel: false
@@ -55,7 +84,10 @@ var yAxis2 = [
 	{
 		type: 'value',
 		axisLine: {
-			onZero: false
+			onZero: false,
+			lineStyle: {
+				color: '#000'
+			}
 		},
 		axisLabel: {
 			showMinLabel: false
@@ -64,58 +96,56 @@ var yAxis2 = [
 	},
 ];
 
-var tooltip1 = {
-	trigger: 'axis',
-	formatter: function (params)
+var formatter1 = function (params)
+{
+	var str = '';
+	try
 	{
-		var str = '';
-		try
+		str += '<strong>Size: ' + params[0].name + '</strong><br>';
+		for (let i in params)
 		{
-			str += '<strong>Length: ' + params[0].name + '</strong><br>';
-			for (let i in params)
-			{
-				str += params[i].marker + ' ' + params[i].seriesName + '　 <strong>' + Math.floor(params[i].value) + '</strong><br>';
-			}
+			str += params[i].marker + ' ' + params[i].seriesName + '　 <strong>' + Math.floor(params[i].value) + '</strong><br>';
 		}
-		catch (err)
-		{
-			console.log(err);
-		}
-		return str;
 	}
+	catch (err)
+	{
+		console.log(err);
+	}
+	return str;
 };
 
-var tooltip2 = {
-	trigger: 'item',
-	formatter: function (params)
+var formatter2 = function (params)
+{
+	var str = '';
+	try
 	{
-		var str = '';
-		try
-		{
-			str += params.marker + ' <strong>Length' + params.name + '</strong><br>'
-			str += '　 <strong>' + params.value + ' (' + Math.round(params.percent) + '%)</strong><br>';
-		}
-		catch (err)
-		{
-			console.log(err);
-		}
-		return str;
+		str += params.marker + ' <strong>Size' + params.name + '</strong><br>'
+		str += '　 <strong>' + params.value + ' (' + Math.round(params.percent) + '%)</strong><br>';
 	}
+	catch (err)
+	{
+		console.log(err);
+	}
+	return str;
 };
 
-var option = {
+var optionLines = {
 	toolbox: {
+		show: true,
 		feature: {
-			dataView: {},
 			saveAsImage: {}
 		}
 	},
+	tooltip: {
+		trigger: 'axis',
+		alwaysShowContent: true
+	},
 	legend: [
 		{
-			left: '7%',
-			top: '7%',
+			left: '1.8%',
+			top: '4%',
 			orient: 'vertical',
-			itemGap: 12,
+			itemGap: 18,
 			data: ['Client 1', 'Client 2', 'Client 3', 'Client 4', 'Client 5',
 				'Client 6', 'Client 7', 'Client 8']
 		}
@@ -123,16 +153,16 @@ var option = {
 	grid: [
 		{
 			left: '3%',
-			right: '30%',
-			top: '38%',
-			bottom: '15%',
+			right: '6%',
+			top: '48%',
+			bottom: '2%',
 			containLabel: true
 		},
 		{
-			left: '16%',
-			right: '30%',
-			top: '6%',
-			bottom: '65%',
+			left: '18%',
+			right: '6%',
+			top: '5%',
+			bottom: '62%',
 			containLabel: true
 		},
 	],
@@ -157,21 +187,20 @@ var option = {
 	xAxis: [
 		{
 			type: 'category',
+			axisLine: {
+				show: false,
+			},
 			gridIndex: 0,
-			min: 1,
-			axisTick: {
-				// interval: 19
-			},
-			axisLabel: {
-				// interval: 19,
-			},
+			min: 1
 		},
 		{
 			type: 'category',
+			axisLine: {
+				show: false,
+			},
 			gridIndex: 1,
-			min: 1,
+			min: 1
 		},
-
 	],
 	series: [
 		{
@@ -182,9 +211,6 @@ var option = {
 			yAxisIndex: 0,
 			stack: 'All',
 			smooth: true,
-			tooltip: {
-				trigger: 'axis'
-			},
 			lineStyle: {
 				width: 2
 			},
@@ -330,16 +356,13 @@ var option = {
 			},
 		},
 		{
-			id: 'antline1',
+			id: 'mouseline1',
 			name: 'Client 1',
 			type: 'line',
 			xAxisIndex: 1,
 			yAxisIndex: 1,
 			stack: 'Ant',
 			smooth: true,
-			tooltip: {
-				trigger: 'axis'
-			},
 			lineStyle: {
 				width: 2
 			},
@@ -352,7 +375,7 @@ var option = {
 			},
 		},
 		{
-			id: 'antline2',
+			id: 'mouseline2',
 			name: 'Client 2',
 			type: 'line',
 			xAxisIndex: 1,
@@ -371,7 +394,7 @@ var option = {
 			},
 		},
 		{
-			id: 'antline3',
+			id: 'mouseline3',
 			name: 'Client 3',
 			type: 'line',
 			xAxisIndex: 1,
@@ -390,7 +413,7 @@ var option = {
 			},
 		},
 		{
-			id: 'antline4',
+			id: 'mouseline4',
 			name: 'Client 4',
 			type: 'line',
 			xAxisIndex: 1,
@@ -409,7 +432,7 @@ var option = {
 			},
 		},
 		{
-			id: 'antline5',
+			id: 'mouseline5',
 			name: 'Client 5',
 			type: 'line',
 			xAxisIndex: 1,
@@ -428,7 +451,7 @@ var option = {
 			},
 		},
 		{
-			id: 'antline6',
+			id: 'mouseline6',
 			name: 'Client 6',
 			type: 'line',
 			xAxisIndex: 1,
@@ -447,7 +470,7 @@ var option = {
 			},
 		},
 		{
-			id: 'antline7',
+			id: 'mouseline7',
 			name: 'Client 7',
 			type: 'line',
 			xAxisIndex: 1,
@@ -466,7 +489,7 @@ var option = {
 			},
 		},
 		{
-			id: 'antline8',
+			id: 'mouseline8',
 			name: 'Client 8',
 			type: 'line',
 			xAxisIndex: 1,
@@ -483,16 +506,50 @@ var option = {
 			emphasis: {
 				focus: 'series'
 			},
+		}
+	],
+	graphic: [
+		{
+			type: 'text',
+			top: '7%',
+			right: '7%',
+			z: 100,
+			style:{
+				text: 'Distribution (Mouse Flows)',
+				fill: 'rgba(0, 0, 0, 0.9)',
+				fontSize: 16,
+				fontWeight: 'bold',
+			}
 		},
+		{
+			type: 'text',
+			top: '50%',
+			right: '7%',
+			z: 100,
+			style:{
+				text: 'Distribution (Overall)',
+				fill: 'rgba(0, 0, 0, 0.9)',
+				fontSize: 18,
+				fontWeight: 'bold',
+			}
+		}
+	]
+};
+
+var optionButton = {
+};
+
+var optionPie = {
+	tooltip: {
+		trigger: 'item'
+	},
+	series: [
 		{
 			id: 'pie1',
 			type: 'pie',
-			center: ['85%', '28%'],
-			radius: ['15%', '25%'],
+			center: ['50%', '50%'],
+			radius: ['55%', '90%'],
 			avoidLabelOverlap: false,
-			tooltip: {
-				trigger: 'item'
-			},
 			label: {
 				position: 'inside',
 				fontWeight: 'bold',
@@ -511,13 +568,13 @@ var option = {
 		{
 			id: 'pie2',
 			type: 'pie',
-			center: ['85%', '27%'],
+			center: ['50%', '47%'],
 			radius: ['0%'],
 			tooltip: { show: false },
 			color: 'rgba(0, 0, 0, 0)',
 			label: {
 				position: 'center',
-				fontSize: 22,
+				fontSize: 26,
 				fontWeight: 'bold',
 				textBorderColor: 'rgba(255,255,255,0.6)',
 				textBorderWidth: 4
@@ -526,33 +583,38 @@ var option = {
 		{
 			id: 'pie3',
 			type: 'pie',
-			center: ['85%', '30%'],
+			center: ['50%', '59%'],
 			radius: ['0%'],
 			tooltip: { show: false },
 			color: 'rgba(0, 0, 0, 0)',
 			label: {
 				position: 'center',
-				fontSize: 16,
+				fontSize: 20,
 				textBorderColor: 'rgba(255,255,255,0.6)',
 				textBorderWidth: 4
 			},
-		},
+		}
+	]
+};
+
+var optionGauge = {
+	series: [
 		{
 			id: 'gauge1',
 			type: 'gauge',
-			center: ['85%', '65%'],
-			radius: '27%',
+			center: ['50%', '54%'],
+			radius: '85%',
 			startAngle: 215,
 			endAngle: -35,
 			title: {
-				fontSize: 20,
+				fontSize: 22,
 				textBorderColor: 'rgba(255,255,255,0.6)',
 				textBorderWidth: 4,
 				offsetCenter : [0, '65%']
 			},
 			detail: {
 				formatter: '{value}',
-				fontSize: 22,
+				fontSize: 26,
 				textBorderColor: 'rgba(255,255,255,0.6)',
 				textBorderWidth: 4,
 			},
@@ -575,70 +637,88 @@ var option = {
 				}
 			},
 		}
-	],
-	graphic: [
-		{
-			name: 'Group 1',
-			type: 'group',
-			right: '2%',
-			top: '6%',
-			z: 100,
-			children:[
-				{
-					type: 'rect',
-					top: 'center',
-					left: 'center',
-					shape:{
-						width: 100,
-						height: 30,
-						r: 15
-					},
-					style: {
-						fill: 'rgba(255,255,255,0.6)',
-						stroke: "#2ec7c9",
-						lineWidth: 3
-					}
-				},
-				{
-					type: 'text',
-					top: 'center',
-					left: 'center',
-					style:{
-						text: '流数/流量',
-						textAlign: 'center',
-						fill: '#000000',
-						fontSize: 16,
-						fontWeight: 'bold',
-					}
-				}
-			]
-		},
-		{
-			type: 'text',
-			top: '8%',
-			right: '31%',
-			z: 100,
-			style:{
-				text: 'Distribution (Mouse Flows)',
-				fill: 'rgba(0, 0, 0, 0.9)',
-				fontSize: 16,
-				fontWeight: 'bold',
-			}
-		},
-		{
-			type: 'text',
-			top: '40%',
-			right: '31%',
-			z: 100,
-			style:{
-				text: 'Distribution (Overall)',
-				fill: 'rgba(0, 0, 0, 0.9)',
-				fontSize: 18,
-				fontWeight: 'bold',
-			}
-		}
 	]
 };
+
+var chartLines = echarts.init(document.getElementById("container1"), 'macarons');
+var chartButton = echarts.init(document.getElementById("container4"), 'macarons');
+var chartPie = echarts.init(document.getElementById("container5"), 'macarons');
+var chartGauge = echarts.init(document.getElementById("container6"), 'macarons');
+
+var dataset;
+var nowdata = 1;
+
+var setOptionData = function()
+{
+	var optionTemp;
+	optionTemp = JSON.parse(JSON.stringify(optionLines));
+	optionTemp.tooltip.formatter = formatter1;
+	optionTemp.yAxis = nowdata === 1 ? yAxis1 : yAxis2;
+	optionTemp.xAxis[0].data = dataset['xaxisdata'];
+	optionTemp.xAxis[1].data = dataset['mouse_xaxisdata'];
+	optionTemp.series[0].data = dataset['flow_all'][1];
+	optionTemp.series[1].data = dataset['flow_all'][2];
+	optionTemp.series[2].data = dataset['flow_all'][3];
+	optionTemp.series[3].data = dataset['flow_all'][4];
+	optionTemp.series[4].data = dataset['flow_all'][5];
+	optionTemp.series[5].data = dataset['flow_all'][6];
+	optionTemp.series[6].data = dataset['flow_all'][7];
+	optionTemp.series[7].data = dataset['flow_all'][8];
+	optionTemp.series[8].data = dataset['flow_mouse'][1];
+	optionTemp.series[9].data = dataset['flow_mouse'][2];
+	optionTemp.series[10].data = dataset['flow_mouse'][3];
+	optionTemp.series[11].data = dataset['flow_mouse'][4];
+	optionTemp.series[12].data = dataset['flow_mouse'][5];
+	optionTemp.series[13].data = dataset['flow_mouse'][6];
+	optionTemp.series[14].data = dataset['flow_mouse'][7];
+	optionTemp.series[15].data = dataset['flow_mouse'][8];
+	chartLines.clear();
+	chartLines.setOption(optionTemp);
+
+	optionTemp = JSON.parse(JSON.stringify(optionButton));
+	chartButton.clear();
+	chartButton.setOption(optionTemp);
+
+	optionTemp = JSON.parse(JSON.stringify(optionPie));
+	optionTemp.tooltip.formatter = formatter2;
+	optionTemp.series[0].data = dataset['flow_pie'][0];
+	optionTemp.series[1].data = [ { 'name': nowdata == 1 ? 'Flows' : 'Traffic', 'value': 1 } ];
+	optionTemp.series[2].data = [ { 'name': dataset['flow_detail'][0], 'value': 1 } ];
+
+	chartPie.clear();
+	chartPie.setOption(optionTemp);
+
+	optionTemp = JSON.parse(JSON.stringify(optionGauge));
+	optionTemp.series[0].data = [ {
+			value: dataset['entropy_detail'][0],
+			name: 'Entropy'
+		} ];
+	chartGauge.clear();
+	chartGauge.setOption(optionTemp);
+
+};
+
+chartButton.getZr().on('mousemove', function(obj) {
+	chartButton.getZr().setCursorStyle('pointer');
+});
+
+chartButton.getZr().on('click', function(obj) {
+	nowdata = nowdata === 1 ? 2 : 1;
+	var tmp;
+	tmp = dataset['flow_all'];
+	dataset['flow_all'] = dataset['traffic_all'];
+	dataset['traffic_all'] = tmp;
+	tmp = dataset['flow_mouse'];
+	dataset['flow_mouse'] = dataset['traffic_mouse'];
+	dataset['traffic_mouse'] = tmp;
+	tmp = dataset['flow_pie'];
+	dataset['flow_pie'] = dataset['traffic_pie'];
+	dataset['traffic_pie'] = tmp;
+	tmp = dataset['flow_detail'];
+	dataset['flow_detail'] = dataset['traffic_detail'];
+	dataset['traffic_detail'] = tmp;
+	setOptionData();
+});
 
 var triggerAction = function(action, selected) {
 	legend = [];
@@ -647,25 +727,16 @@ var triggerAction = function(action, selected) {
 			legend.push({name: name});
 		}
 	}
-	mainChart.dispatchAction({
+	chartLines.dispatchAction({
 		type: action,
 		batch: legend
 	});
 };
 
-mainChart.on('mouseover', 'series.pie', function(obj) {
-	mainChart.setOption({ tooltip: tooltip2, notMerge: true });
-})
-
-mainChart.on('mouseout', 'series.pie', function(obj) {
-	mainChart.setOption({ tooltip: tooltip1, notMerge: true });
-})
-
-var nowdata = 1;
-
-mainChart.on('legendselectchanged', function(obj) {
+chartLines.on('legendselectchanged', function(obj) {
 	var selected = obj.selected;
 	var legend = obj.name;
+	console.log(obj)
 
 	var selectedCount = 0;
 	if (selected != undefined)
@@ -673,126 +744,53 @@ mainChart.on('legendselectchanged', function(obj) {
 		for (name in selected)
 			if (selected[name] == true)
 				++selectedCount;
-		if (selectedCount === 0) {
-			if (nowdata === 1)
-			{
-				mainChart.setOption({ series: { id: 'pie1', data: chart1['piedata1']['total'] }});
-				mainChart.setOption({ series: { id: 'pie2', data: [ { 'name': '总流数', 'value': 1 } ] }});
-				mainChart.setOption({ series: { id: 'pie3', data: [ { 'name': chart1['flowall'][8], 'value': 1 } ] }});
-			}
-			else
-			{
-				mainChart.setOption({ series: { id: 'pie1', data: chart1['piedata1']['total'] }});
-				mainChart.setOption({ series: { id: 'pie2', data: [ { 'name': '总流量', 'value': 1 } ] }});
-				mainChart.setOption({ series: { id: 'pie3', data: [ { 'name': chart1['pktall'][8], 'value': 1 } ] }});
-			}
-			mainChart.setOption({ series: { id: 'gauge1', data: [{ value: chart1.entropy[8][0], name: 'Entropy', pointer: { itemStyle: { color : 'rgba(0, 0, 0, 0)' } } },
-				{ value: chart1.entropy[8][0], name: 'x' + chart1.entropy[8][1], title: { fontSize: 12, offsetCenter : ['28%', '20%'] } }] } });
+		if (selectedCount === 0)
+		{
+			chartPie.setOption({ series: { id: 'pie1', data: dataset['flow_pie'][0] }});
+			chartPie.setOption({ series: { id: 'pie2', data: [ { 'name': nowdata === 1 ? '总流数' : '总流量', 'value': 1 } ] }});
+			chartPie.setOption({ series: { id: 'pie3', data: [ { 'name': dataset['flow_detail'][0], 'value': 1 } ] }});
+			
+			chartGauge.setOption({ series: { id: 'gauge1', data: [
+				{ value: dataset['entropy_detail'][0], name: 'Entropy' } ] } });
 			triggerAction('legendToggleSelect', selected);
 		}
-		else {
-			if (nowdata === 1)
-			{
-				mainChart.setOption({ series: { id: 'pie1', data: chart1['piedata1'][legend] }});
-				mainChart.setOption({ series: { id: 'pie2', data: [ { 'name': legend, 'value': 1 } ] }});
-				mainChart.setOption({ series: { id: 'pie3', data: [ { 'name': chart1['flowall'][legend[7]-1], 'value': 1 } ] }});
-			}
-			else
-			{
-				mainChart.setOption({ series: { id: 'pie1', data: chart1['piedata1'][legend] }});
-				mainChart.setOption({ series: { id: 'pie2', data: [ { 'name': legend, 'value': 1 } ] }});
-				mainChart.setOption({ series: { id: 'pie3', data: [ { 'name': chart1['pktall'][legend[7]-1], 'value': 1 } ] }});
-			}
-			mainChart.setOption({ series: { id: 'gauge1', data: [{ value: chart1.entropy[legend[7]-1][0], name: 'Entropy', pointer: { itemStyle: { color : 'rgba(0, 0, 0, 0)' } } },
-				{ value: chart1.entropy[legend[7]-1][0], name: 'x' + chart1.entropy[legend[7]-1][1], title: { fontSize: 12, offsetCenter : ['28%', '20%'] } }] } });
+		else
+		{
+			chartPie.setOption({ series: { id: 'pie1', data: dataset['flow_pie'][legend[7]] }});
+			chartPie.setOption({ series: { id: 'pie2', data: [ { 'name': legend, 'value': 1 } ] }});
+			chartPie.setOption({ series: { id: 'pie3', data: [ { 'name': dataset['flow_detail'][legend[7]], 'value': 1 } ] }});
+			chartGauge.setOption({ series: { id: 'gauge1', data: [
+				{ value: dataset['entropy_detail'][legend[7]], name: 'Entropy'} ] } });
 			if (selectedCount === 7)
 				triggerAction('legendToggleSelect', selected);
 			else
 				for (name in selected)
 					if (name != legend && selected[name] == true)
-						mainChart.dispatchAction({type: 'legendToggleSelect', batch: [{name: name}]});
+						chartLines.dispatchAction({type: 'legendToggleSelect', batch: [{name: name}]});
 		}
 	}
 });
 
-var setOptionData = function(option, chart1)
-{
-	var newoption = JSON.parse(JSON.stringify(option));
-	newoption.tooltip = tooltip1;
-	if (nowdata === 1)
-	{
-		newoption.yAxis = yAxis1;
-		newoption.series[17].data = [ { 'name': '总流数', 'value': 1 } ];
-		newoption.series[18].data = [ { 'name': chart1['flowall'][8], 'value': 1 } ];
-	}
-	else
-	{
-		newoption.yAxis = yAxis2;
-		newoption.series[17].data = [ { 'name': '总流量', 'value': 1 } ]
-		newoption.series[18].data = [ { 'name': chart1['pktall'][8], 'value': 1 } ]
-	}
-	newoption.xAxis[0].data = chart1['xaxisdata'];
-	newoption.xAxis[1].data = chart1['antxaxisdata'];
-	newoption.series[0].data = chart1['linedata1']['Client 1'];
-	newoption.series[1].data = chart1['linedata1']['Client 2'];
-	newoption.series[2].data = chart1['linedata1']['Client 3'];
-	newoption.series[3].data = chart1['linedata1']['Client 4'];
-	newoption.series[4].data = chart1['linedata1']['Client 5'];
-	newoption.series[5].data = chart1['linedata1']['Client 6'];
-	newoption.series[6].data = chart1['linedata1']['Client 7'];
-	newoption.series[7].data = chart1['linedata1']['Client 8'];
-	newoption.series[8].data = chart1['antlinedata1']['Client 1'];
-	newoption.series[9].data = chart1['antlinedata1']['Client 2'];
-	newoption.series[10].data = chart1['antlinedata1']['Client 3'];
-	newoption.series[11].data = chart1['antlinedata1']['Client 4'];
-	newoption.series[12].data = chart1['antlinedata1']['Client 5'];
-	newoption.series[13].data = chart1['antlinedata1']['Client 6'];
-	newoption.series[14].data = chart1['antlinedata1']['Client 7'];
-	newoption.series[15].data = chart1['antlinedata1']['Client 8'];
-	newoption.series[16].data = chart1['piedata1']['total'];
-	newoption.series[19].data = [ {
-			value: chart1.entropy[8][0],
-			name: 'Entropy',
-			pointer: { itemStyle: { color : 'rgba(0, 0, 0, 0)' } }
-		}, {
-			value: chart1.entropy[8][0],
-			name: 'x' + chart1.entropy[8][1],
-			title: {
-				fontSize: 12,
-				offsetCenter : ['28%', '20%']
-			},
-		} ];
-	return newoption;
-}
-
-mainChart.on('click', 'graphic', function(obj) {
-	if (nowdata === 1)
-		nowdata = 2;
-	else
-		nowdata = 1;
-	var tmp;
-	tmp = chart1['linedata1'];
-	chart1['linedata1'] = chart1['linedata2'];
-	chart1['linedata2'] = tmp;
-	tmp = chart1['antlinedata1'];
-	chart1['antlinedata1'] = chart1['antlinedata2'];
-	chart1['antlinedata2'] = tmp;
-	tmp = chart1['piedata1'];
-	chart1['piedata1'] = chart1['piedata2'];
-	chart1['piedata2'] = tmp;
-	var newoption = setOptionData(option, chart1);
-	mainChart.clear();
-	mainChart.setOption(newoption);
-})
-
 var draw = function(data)
 {
-	chart1 = data;
-	mainChart.clear();
+	dataset = data;
+	console.log(dataset);
 	nowdata = 1;
-	var visoption = setOptionData(option, chart1);
-	mainChart.setOption(visoption);
-}
+	setOptionData();
+};
+
+window.onresize = function ()
+{
+	sidebarChart.resize();
+	if (chartLines)
+		chartLines.resize();
+	if (chartButton)
+		chartButton.resize();
+	if (chartPie)
+		chartPie.resize();
+	if (chartGauge)
+		chartGauge.resize();
+};
 
 </script>
 {% endblock %}
